@@ -12,7 +12,7 @@ Trabalhos de Computação Gráfica, disciplina da graduação em Ciência da Com
 -[X] c. ~~A mesma tela deve ser visualizada em loop~~: quando o coelho chegar ao final da horta, o cenário deve reiniciar de forma imperceptível ao jogador.
 
 ### 2. Implemente o personagem principal (o coelho), que deve se movimentar de forma articulada:
--[ ] a. O coelho deve correr da esquerda para a direita, movimentando as patas dianteiras e traseiras e as orelhas de forma alternada, simulando o andar característico do animal;
+-[X] a. O coelho deve correr da esquerda para a direita, movimentando as patas dianteiras e traseiras e as orelhas de forma alternada, simulando o andar característico do animal;
 
 -[X] b. O personagem deve ser construído a partir de primitivas (quadriláteros, círculos e triângulos), modeladas inicialmente em seus próprios sistemas de coordenadas,
 centrados na origem, e organizadas de forma hierárquica (corpo como nó pai das patas, orelhas e cauda);

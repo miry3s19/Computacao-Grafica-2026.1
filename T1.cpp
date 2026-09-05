@@ -10,6 +10,7 @@ cores: https://mycolor.space/?hex=%2385C6F0&sub=1 (Pode mudar a paleta à vontad
 
 #include <GL/glut.h>
 #include <cmath>
+#include <cstdlib>
 
 const double PI = 3.14159;
 const double aspectRatio = 960.0 / 540.0; //Mantém a proporção dos desenhos para 16:9. Multiplicar tudo que depende de x por aspectRatio.
@@ -34,6 +35,7 @@ void desenhaHorta();
 
 //ELEMENTOS DE PERSONAGENS
 void desenhaCorpoCoelho();
+void desenhaCorpoRaposa();
 
 
 int polygon = 4;
@@ -43,18 +45,25 @@ double velocidade = 0.1;
 bool jogoRodando = false;
 
 //ANIMAÇÃO DO COELHO
-float anguloPerna = 0.0;
+float alturaPerna = 0.0;
 float velocidadePerna = 3.0;
 void animaPerna();
+void animaOrelha();
 
 //PULO DO COELHO
 float altura = 0.0;
 float velocidadePulo = 3.0;
 bool coelhoPulando = false;
-float gravidade = -0.4;
-float forcaPulo = 3;
+float gravidade = -0.15;
+float forcaPulo = 2.25;
 void iniciaPulo();
 void atualizaPulo();
+
+//APARECIMENTO DA RAPOSA
+float raposaX= 30;
+float raposaY = -2;
+bool raposaVisivel = false;
+void atualizaRaposa();
 
 void init(void)
 {
@@ -114,6 +123,11 @@ void display() {
     desenhaCorpoCoelho();
     glPopMatrix();
 
+    glPushMatrix();
+    glTranslated(raposaX,raposaY,0);
+    desenhaCorpoRaposa();
+    glPopMatrix();
+
  // Libera o buffer de comando de desenho para fazer o desenho acontecer o mais rápido possível.
   glFlush();
   glutSwapBuffers(); // Evita efeito de "flicker" (piscada) na tela
@@ -166,7 +180,9 @@ void update(int valor) {
         if (offsetX < -40) offsetX += 40;
 
         animaPerna();
+        animaOrelha();
         atualizaPulo();
+        atualizaRaposa();
     }
     glutTimerFunc(16, update, 0);
     glutPostRedisplay();
@@ -371,14 +387,14 @@ void desenhaCorpoCoelho() {
 
     //orelhas
     glPushMatrix();
-    glTranslated(-0.8, 2.4, 0);
+    glTranslated(-0.8, 2.4 + alturaPerna, 0);
     glScaled(1, 3, 1);
     glRotatef(25.0, 0, 0, 1); 
     desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5, 1, 0.92, 0.8);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslated(-0.2, 2.4, 0);
+    glTranslated(-0.2, 2.4 - alturaPerna, 0);
     glScaled(1, 3, 1);
     glRotatef(25.0, 0, 0, 1); 
     desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5, 1, 0.92, 0.8);
@@ -386,29 +402,99 @@ void desenhaCorpoCoelho() {
 
     //pernas
     glPushMatrix();
-    glTranslated(-2, -3.2, 0);
-    glTranslated(0, -0.5, 0);     
-    glRotatef(-anguloPerna, 0, 0, 1);
-    glTranslated(0, 0.5, 0);
+    glTranslated(-2, -3.2 - alturaPerna, 0);
     desenhaRetangulo(0.7, 1, 1, 0.92, 0.8);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslated(-3.5, -3.2, 0);
-    glTranslated(0, -0.5, 0);
-    glRotatef(anguloPerna, 0, 0, 1);
-    glTranslated(0, 0.5, 0);
+    glTranslated(-3.5, -3.2 + alturaPerna, 0);
     desenhaRetangulo(0.7, 1, 1, 0.92, 0.8);
     glPopMatrix();
 
     glPopMatrix();
 }
 
+void desenhaCorpoRaposa(){
+
+        //cabeça
+    desenhaCirculo(1.7, 0.95, 0.51, 0.49);
+
+    //corpo
+    glPushMatrix();
+    glTranslated(2.5,-1.5,0);
+    desenhaCirculo(1.9, 0.95, 0.51, 0.49);
+    glPopMatrix();
+
+    //focinho
+    glPushMatrix();
+    glScaled(1.5,1.5,1.5);
+    glTranslated(-1.3,-0.4,0);
+    glRotated(90,0,0,1);
+    desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5, 1, 1, 1);
+    glPopMatrix();
+
+    glPushMatrix();
+    glScaled(0.3,0.3,1);
+    glTranslated(-8.52,-1.5,0);
+    desenhaCirculo(0.5, 0, 0, 0);
+    glPopMatrix();
+
+    //rabo
+    glPushMatrix();
+    glTranslated(5, 1,0);
+    glRotated(150,0,0,1);
+    glScaled(2,4,1);
+    desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5, 0.95, 0.51, 0.49);
+    glPopMatrix();
+
+    //olho
+    glPushMatrix();
+    glScaled(0.3,0.3,1);
+    glTranslated(-1,0.7,0);
+    desenhaCirculo(0.5, 0, 0, 0);
+    glPopMatrix();
+
+    //orelhas
+    glPushMatrix();
+    glTranslated(0.8, 2.0, 0);
+    glScaled(1, 2, 1);
+    glRotatef(-25.0, 0, 0, 1); 
+    desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5,0.95, 0.51, 0.49);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslated(0.2, 2.0, 0);
+    glScaled(1, 2, 1);
+    glRotatef(-25.0, 0, 0, 1); 
+    desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5, 0.95, 0.51, 0.49);
+    glPopMatrix();
+
+    //pernas
+    glPushMatrix();
+    glTranslated(2, -3.2 - alturaPerna, 0);
+    desenhaRetangulo(0.7, 1, 0.95, 0.51, 0.49);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslated(3.5, -3.2 + alturaPerna, 0);
+    desenhaRetangulo(0.7, 1, 0.95, 0.51, 0.49);
+    glPopMatrix();
+}
+
 void animaPerna(){
     if(jogoRodando){
-        anguloPerna += velocidadePerna;
-        if(anguloPerna > 25) {
-            anguloPerna = -25;
+        alturaPerna += 0.03;
+        if(alturaPerna > 0.3) {
+            alturaPerna = -0.3;
+        }
+    }
+}
+
+void animaOrelha(){
+    if(jogoRodando){
+        alturaPerna += 0.03;
+        if(alturaPerna > 0.3) {
+            alturaPerna = -0.3;
         }
     }
 }
@@ -429,6 +515,26 @@ void atualizaPulo(){
             altura = 0;
             coelhoPulando = false;
             velocidadePulo = 0;
+        }
+    }
+}
+
+void atualizaRaposa(){
+    if(!jogoRodando) return;
+
+    if(!raposaVisivel){
+        int numeroAleatorio = rand() % 100;
+
+        if (numeroAleatorio < 1){
+            raposaX = 30.0; 
+            raposaY = -2.0;
+            raposaVisivel = true;
+        }
+    }
+    else{
+        raposaX -= 0.4;  
+        if(raposaX < -30.0){
+            raposaVisivel = false;
         }
     }
 }
