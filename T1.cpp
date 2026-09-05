@@ -24,6 +24,7 @@ void desenhaRetangulo(double, double, float, float, float);
 void desenhaTriangulo(double, double, double, double, double, double, float, float, float);
 void desenhaCirculo(double, float, float, float);
 void desenhaTrapezio(double, double, double, float, float, float);
+void desenhaLinhaCentro(float, float, float, float, float, float, float, float, float);
 
 //ELEMENTOS DO CENARIO: CÉU
 void desenhaSol();
@@ -32,6 +33,15 @@ void desenhaSol();
 void desenhaGrama();
 void desenhaCerca();
 void desenhaHorta();
+
+//INFORMAÇÕES DO JOGO
+void desenhaVidas();
+
+//ELEMENTOS DE BONIFICAÇÃO
+void desenhaAlmeirao();
+void desenhaCenoura();
+void desenhaCouve();
+void desenhaLinhasCouve(float, float, float); 
 
 //ELEMENTOS DE PERSONAGENS
 void desenhaCorpoCoelho();
@@ -93,6 +103,8 @@ void display() {
     desenhaSol();
     glPopMatrix();
     
+    
+    
     for(int i = 0; i < 4; i++) {
         glPushMatrix();
         glTranslated(offsetX + (i * 40), 0, 0);  // i=0: posição atual, i=1: +40 adiante
@@ -114,9 +126,25 @@ void display() {
         glTranslated(0, -4, 0);
         desenhaHorta();
         glPopMatrix();
-        
+                
         glPopMatrix();
     }
+    
+    /*glPushMatrix();
+    glTranslated(4,-5,0);
+    desenhaAlmeirao();
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslated(7,-5,0);
+    desenhaCenoura();
+    glPopMatrix();
+   
+    glPushMatrix();
+    glTranslated(10,-5,0);
+    desenhaCouve();
+    glPopMatrix();*/
+   
    
     glPushMatrix();
     glTranslated(-12,-2,0);
@@ -271,6 +299,18 @@ void desenhaTrapezio(double baseMaior, double baseMenor, double height, float r,
     );
 }
 
+void desenhaLinhaCentro(float x1, float y1, float x2, float y2, float x3, float y3, float r, float g, float b) {
+    float mx = (x2 + x3) / 2.0f;
+    float my = (y2 + y3) / 2.0f;
+
+    glColor3f(r, g, b);
+    glLineWidth(1.4f);
+    glBegin(GL_LINES);
+        glVertex2f(x1, y1);
+        glVertex2f(mx, my);
+    glEnd();
+}
+
 
 //ELEMENTOS DO CENÁRIO: CÉU
 
@@ -343,6 +383,131 @@ void desenhaHorta() {
         glPopMatrix();
     }
 }
+
+//ELEMENTOS DE BONIFICAÇÃO
+void desenhaAlmeirao() {
+    // Cor das folhas
+    float r = 0.698f;
+    float g = 0.980f;
+    float b = 0.576f;
+    
+    // Cor das linhas
+    float lr = 0.55f;
+    float lg = 0.0f;
+    float lb = 0.55f;
+    
+    // Caule
+    glColor3f(r * 0.8, g * 0.8, b * 0.8);
+    glLineWidth(3.0f);
+    glBegin(GL_LINES);
+        glVertex2f(0.0f, 0.25f);
+        glVertex2f(0.0f, -0.7f);
+    glEnd();
+    glLineWidth(1.0f);
+    
+    // Folhas
+    desenhaTriangulo(0.0f, 2.0f, 0.35f, 0.25f, -0.35f, 0.25f, r, g, b);
+    desenhaLinhaCentro(0.0f, 2.0f, 0.35f, 0.25f, -0.35f, 0.25f, lr, lg, lb);
+    
+    desenhaTriangulo(-1.5f, 1.5f, -0.45f, 0.25f, 0.15f, 0.25f, r * 0.8, g * 0.8, b * 0.8);
+    desenhaLinhaCentro(-1.5f, 1.5f, -0.45f, 0.25f, 0.15f, 0.25f, lr, lg, lb);
+    
+    glPushMatrix();
+    glScaled(-1, 1, 1);
+    desenhaTriangulo(-1.5f, 1.5f, -0.45f, 0.25f, 0.15f, 0.25f, r * 0.8, g * 0.8, b * 0.8);
+    desenhaLinhaCentro(-1.5f, 1.5f, -0.45f, 0.25f, 0.15f, 0.25f, lr, lg, lb);
+    glPopMatrix();  
+    
+    desenhaTriangulo(-1.7f, 0.75f, 0.45f, 0.25f, -0.05f, -0.1f, r * 0.9, g * 0.9, b * 0.9);
+    desenhaLinhaCentro(-1.7f, 0.75f, 0.45f, 0.25f, -0.05f, -0.1f, lr, lg, lb);
+    
+    glPushMatrix();
+    glScaled(-1, 1, 1);
+    desenhaTriangulo(-1.7f, 0.75f, 0.45f, 0.25f, -0.05f, -0.1f, r * 0.95, g * 0.95, b * 0.95);
+    desenhaLinhaCentro(-1.7f, 0.75f, 0.45f, 0.25f, -0.05f, -0.1f, lr, lg, lb);
+    glPopMatrix();    
+}
+
+void desenhaCenoura() {
+    //Cor da raiz
+    float r = 0.9686f;
+    float g = 0.6039f;
+    float b = 0.0941f;
+    
+    //Cor das folhas
+    float fr = 0.0f;
+    float fg = 0.2784f;
+    float fb = 0.2314f;
+    
+    //Raiz
+    desenhaTriangulo(0, 0, 0.5, 2, -0.5, 2, r, g, b);
+    
+    //Folhas
+    glPushMatrix();
+    glTranslated(0, 2, 0);
+    desenhaTriangulo(0, 1.2, 0.25, 0, -0.25, 0, fr, fg, fb);
+    glPopMatrix();    
+    
+    glPushMatrix();
+    glTranslated(-0.25, 2, 0);
+    desenhaTriangulo(-0.25, 0, -0.25, 0.8, 0, 0, fr, fg, fb);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslated(0.25, 2, 0);
+    glScaled(-1,1,0);
+    desenhaTriangulo(-0.25, 0, -0.25, 0.8, 0, 0, fr, fg, fb);
+    glPopMatrix();     
+    
+}
+
+void desenhaLinhasCouve(float r, float g, float b) {
+    glColor3f(r, g, b);
+    glLineWidth(2.0f);
+
+    glBegin(GL_LINES);
+        //Linha central
+        glVertex2f(0.0f, -0.1f); 
+        glVertex2f(0.0f, 2.8f); 
+
+        // Linhas laterais
+        glVertex2f(0.0f, 0.6f);
+        glVertex2f(0.6f, 1.1f);
+
+        glVertex2f(0.0f, 0.6f);
+        glVertex2f(-0.6f, 1.1f);
+        
+        glVertex2f(0.0f, 1.2f);
+        glVertex2f(0.7f, 1.8f); 
+
+        glVertex2f(0.0f, 1.2f);
+        glVertex2f(-0.7f, 1.8f);
+
+        glVertex2f(0.0f, 1.9f);
+        glVertex2f(0.6f, 2.5f);
+
+        glVertex2f(0.0f, 1.9f);
+        glVertex2f(-0.6f, 2.5f);
+    glEnd();
+
+    glLineWidth(1.0f); 
+}
+
+void desenhaCouve() {
+    
+    glPushMatrix();
+    glTranslated(0, 1.7, 0);
+    glScaled(1.1,1.5,1);
+    desenhaCirculo(1, 0.0f, 0.2784f, 0.2314f);
+    glPopMatrix();  
+    
+    
+    desenhaLinhasCouve(0.698f, 0.980f, 0.576f);
+}
+
+
+
+//ELEMENTOS DE PERSONAGENS
 
 void desenhaCorpoCoelho() {
 
@@ -538,3 +703,5 @@ void atualizaRaposa(){
         }
     }
 }
+
+//ELEMENTOS DE BONIFICAÇÃO
