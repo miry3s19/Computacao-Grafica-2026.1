@@ -32,11 +32,29 @@ void desenhaGrama();
 void desenhaCerca();
 void desenhaHorta();
 
+//ELEMENTOS DE PERSONAGENS
+void desenhaCorpoCoelho();
+
+
 int polygon = 4;
 //SIDE SCROLLING
 double offsetX = 0.0; 
 double velocidade = 0.1;
 bool jogoRodando = false;
+
+//ANIMAÇÃO DO COELHO
+float anguloPerna = 0.0;
+float velocidadePerna = 3.0;
+void animaPerna();
+
+//PULO DO COELHO
+float altura = 0.0;
+float velocidadePulo = 3.0;
+bool coelhoPulando = false;
+float gravidade = -0.4;
+float forcaPulo = 3;
+void iniciaPulo();
+void atualizaPulo();
 
 void init(void)
 {
@@ -91,6 +109,10 @@ void display() {
         glPopMatrix();
     }
    
+    glPushMatrix();
+    glTranslated(-12,-2,0);
+    desenhaCorpoCoelho();
+    glPopMatrix();
 
  // Libera o buffer de comando de desenho para fazer o desenho acontecer o mais rápido possível.
   glFlush();
@@ -105,6 +127,9 @@ void keyboard( unsigned char key, int x, int y )
     switch( key ) {
         case 13 :
             jogoRodando = !jogoRodando;
+        break;
+        case 32: //pra adicionar o pulo
+            iniciaPulo();
         break;
     }
 display();
@@ -139,6 +164,9 @@ void update(int valor) {
     if(jogoRodando){
         offsetX -= velocidade;
         if (offsetX < -40) offsetX += 40;
+
+        animaPerna();
+        atualizaPulo();
     }
     glutTimerFunc(16, update, 0);
     glutPostRedisplay();
@@ -300,5 +328,107 @@ void desenhaHorta() {
     }
 }
 
+void desenhaCorpoCoelho() {
 
+    glPushMatrix();
+    glTranslated(0, altura, 0);
 
+    //cabeça
+    desenhaCirculo(1.7, 1, 0.92, 0.8);
+
+    //corpo
+    glPushMatrix();
+    glTranslated(-2.5,-1.5,0);
+    desenhaCirculo(1.9, 1, 0.92, 0.8);
+    glPopMatrix();
+
+    //focinho
+    glPushMatrix();
+    glScaled(0.3,0.3,1);
+    glTranslated(5,-0.7,0);
+    desenhaCirculo(1.9, 1, 1, 1);
+    glPopMatrix();
+
+    glPushMatrix();
+    glScaled(0.3,0.3,1);
+    glTranslated(6,0.3,0);
+    desenhaCirculo(0.5, 0.90, 0.67, 0.81);
+    glPopMatrix();
+
+    //pompom
+    glPushMatrix();
+    glScaled(0.3,0.3,1);
+    glTranslated(-15,-7,0);
+    desenhaCirculo(1.9, 1, 0.92, 0.8);
+    glPopMatrix();
+
+    //olho
+    glPushMatrix();
+    glScaled(0.3,0.3,1);
+    glTranslated(1,0.7,0);
+    desenhaCirculo(0.5, 0, 0, 0);
+    glPopMatrix();
+
+    //orelhas
+    glPushMatrix();
+    glTranslated(-0.8, 2.4, 0);
+    glScaled(1, 3, 1);
+    glRotatef(25.0, 0, 0, 1); 
+    desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5, 1, 0.92, 0.8);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslated(-0.2, 2.4, 0);
+    glScaled(1, 3, 1);
+    glRotatef(25.0, 0, 0, 1); 
+    desenhaTriangulo(-0.5, -0.5, 0.5, -0.5, 0.0, 0.5, 1, 0.92, 0.8);
+    glPopMatrix();
+
+    //pernas
+    glPushMatrix();
+    glTranslated(-2, -3.2, 0);
+    glTranslated(0, -0.5, 0);     
+    glRotatef(-anguloPerna, 0, 0, 1);
+    glTranslated(0, 0.5, 0);
+    desenhaRetangulo(0.7, 1, 1, 0.92, 0.8);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslated(-3.5, -3.2, 0);
+    glTranslated(0, -0.5, 0);
+    glRotatef(anguloPerna, 0, 0, 1);
+    glTranslated(0, 0.5, 0);
+    desenhaRetangulo(0.7, 1, 1, 0.92, 0.8);
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+void animaPerna(){
+    if(jogoRodando){
+        anguloPerna += velocidadePerna;
+        if(anguloPerna > 25) {
+            anguloPerna = -25;
+        }
+    }
+}
+
+void iniciaPulo(){
+    if(!coelhoPulando) {
+        coelhoPulando = true;
+        velocidadePulo = forcaPulo;
+    }
+}
+
+void atualizaPulo(){
+    if(coelhoPulando){
+        velocidadePulo += gravidade;
+        altura += velocidadePulo;
+
+        if (altura <= 0){
+            altura = 0;
+            coelhoPulando = false;
+            velocidadePulo = 0;
+        }
+    }
+}

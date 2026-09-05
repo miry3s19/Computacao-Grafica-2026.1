@@ -14,10 +14,10 @@ Trabalhos de Computação Gráfica, disciplina da graduação em Ciência da Com
 ### 2. Implemente o personagem principal (o coelho), que deve se movimentar de forma articulada:
 -[ ] a. O coelho deve correr da esquerda para a direita, movimentando as patas dianteiras e traseiras e as orelhas de forma alternada, simulando o andar característico do animal;
 
--[ ] b. O personagem deve ser construído a partir de primitivas (quadriláteros, círculos e triângulos), modeladas inicialmente em seus próprios sistemas de coordenadas,
+-[X] b. O personagem deve ser construído a partir de primitivas (quadriláteros, círculos e triângulos), modeladas inicialmente em seus próprios sistemas de coordenadas,
 centrados na origem, e organizadas de forma hierárquica (corpo como nó pai das patas, orelhas e cauda);
 
--[ ] c. Ao acionar uma tecla do teclado, o coelho deve saltar, sendo capaz de transpor cercas e buracos presentes no caminho.
+-[X] c. Ao acionar uma tecla do teclado, o coelho deve saltar, sendo capaz de transpor cercas e buracos presentes no caminho.
 
 ### 3. Implemente o aparecimento de elementos de bonificação (vegetais, como cenouras, alfaces e rabanetes) que devem ser capturados pelo coelho:
 -[ ] a. A cada vez que a tela reinicia o loop, os vegetais devem ser adicionados aleatoriamente à paisagem, ao alcance do coelho, aparecendo à medida que o personagem avança;
