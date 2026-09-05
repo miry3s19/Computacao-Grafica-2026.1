@@ -16,6 +16,7 @@ const double aspectRatio = 960.0 / 540.0; //Mantém a proporção dos desenhos p
 
 void init(void);
 void display(void);
+void update (int);
 
 // PRIMITIVAS GEOMÉTRICAS
 void desenhaRetangulo(double, double, float, float, float);
@@ -31,8 +32,11 @@ void desenhaGrama();
 void desenhaCerca();
 void desenhaHorta();
 
-
 int polygon = 4;
+//SIDE SCROLLING
+double offsetX = 0.0; 
+double velocidade = 0.1;
+bool jogoRodando = false;
 
 void init(void)
 {
@@ -43,7 +47,8 @@ void init(void)
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity();
   
-  glOrtho (-10 * aspectRatio, 10 * aspectRatio, -10, 10, -1, 1);
+  //glOrtho (-100 * aspectRatio, 100 * aspectRatio, -100, 100, -1, 1); //Para ver o mundo completo
+  glOrtho (-10 * aspectRatio, 10 * aspectRatio, -10, 10, -1, 1); //Para ver o viewport
 }
 
 
@@ -52,6 +57,7 @@ void display() {
 
   // Limpa a janela, colocando na tela a cor definida pela função glClearColor
   glClear(GL_COLOR_BUFFER_BIT);
+ 
   
   // Sol
     glPushMatrix();
@@ -59,25 +65,31 @@ void display() {
     //glRotated(-(float)frameNumber/4,0,0,1);
     desenhaSol();
     glPopMatrix();
-
-  // Grama
-    glPushMatrix();
-    glTranslated(0,-6,0);
-    desenhaGrama();
-    glPopMatrix();   
-
-  // Cerca
-    glPushMatrix();
-    glTranslated(0,-1.8,0);
-    desenhaCerca();
-    glPopMatrix(); 
     
-  // Horta
-    glPushMatrix();
-    glTranslated(0,-4,0);
-    desenhaHorta();
-    glPopMatrix();
-
+    for(int i = 0; i < 4; i++) {
+        glPushMatrix();
+        glTranslated(offsetX + (i * 40), 0, 0);  // i=0: posição atual, i=1: +40 adiante
+        
+       // Grama
+        glPushMatrix();
+        glTranslated(0, -6, 0);
+        desenhaGrama();
+        glPopMatrix();
+        
+       // Cerca
+        glPushMatrix();
+        glTranslated(0, -1.8, 0);
+        desenhaCerca();
+        glPopMatrix();
+        
+       // Horta
+        glPushMatrix();
+        glTranslated(0, -4, 0);
+        desenhaHorta();
+        glPopMatrix();
+        
+        glPopMatrix();
+    }
    
 
  // Libera o buffer de comando de desenho para fazer o desenho acontecer o mais rápido possível.
@@ -87,16 +99,11 @@ void display() {
 
 void keyboard( unsigned char key, int x, int y )
 {
-	switch( key ) {
-	case 'p' : case 'P' :
-		glClearColor(0.0, 0.0, 0.0, 1.0);
-	break;
-
-	case 'b' : case 'B' :
-		glClearColor(1.0, 1.0, 1.0, 1.0);
-
-	break;
-	}
+    switch( key ) {
+        case 13 :
+            jogoRodando = !jogoRodando;
+        break;
+    }
 display();
 }
 
@@ -125,6 +132,15 @@ void mouse(int button, int action, int x, int y)
   display();
 }
 
+void update(int valor) {
+    if(jogoRodando){
+        offsetX -= velocidade;
+        if (offsetX < -40) offsetX += 40;
+    }
+    glutTimerFunc(16, update, 0);
+    glutPostRedisplay();
+}
+
 int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
@@ -138,7 +154,8 @@ int main(int argc, char** argv)
   init();
 
   glutDisplayFunc(display);
-
+  glutTimerFunc(0, update, 0);
+  
   // Indica que sempre que uma tecla for pressionada no teclado, GLUT deverá chama a função keyboard() para tratar eventos de teclado (keyboard callback).
   // A função de teclado deve possuir o seguinte protótipo:
   glutKeyboardFunc(keyboard);
@@ -232,9 +249,9 @@ void desenhaSol(){
 //ELEMENTOS DO CENÁRIO: CHÃO
 void desenhaGrama() {
    //Base
-    desenhaRetangulo(20 * aspectRatio, 8, 0.427, 0.592, 0.314);
-    double inicio = -10 * aspectRatio;
-    double fim = 10 * aspectRatio;
+    desenhaRetangulo(40 * aspectRatio, 8, 0.427, 0.592, 0.314);
+    double inicio = (-20 * aspectRatio) - 0.5;
+    double fim = (20 * aspectRatio)+ 0.5;
     double passo = 1;
     
    //Serrilhado do topo
@@ -245,8 +262,8 @@ void desenhaGrama() {
 
 void desenhaCerca() {
    //Tábuas verticais
-    double inicio = -9.75 * aspectRatio;
-    double fim = 9.75 * aspectRatio;
+    double inicio = -19.75 * aspectRatio;
+    double fim = 19.75 * aspectRatio;
     double passo = 2;
     for(double x = inicio; x <= fim; x+=passo) {
         glPushMatrix();
@@ -262,25 +279,22 @@ void desenhaCerca() {
     for(double y = inicio; y >= fim; y+=passo) {
         glPushMatrix();
         glTranslated(0,y,0);
-        desenhaRetangulo(20 * aspectRatio, 0.4, 0.922, 0.604, 0.157);
+        desenhaRetangulo(40 * aspectRatio, 0.4, 0.922, 0.604, 0.157);
         glPopMatrix();
     }    
 }
 
 void desenhaHorta() {
-    glPushMatrix();
-    glTranslated(-8,-2,0);
-    desenhaTrapezio(7.5 * aspectRatio, 4.5 * aspectRatio, 2, 0.561, 0.306, 0.0);
-    glBegin(GL_LINES);
-    glEnd();
-    glPopMatrix();
+    double posicoes[4] = {-18 * aspectRatio, -6 * aspectRatio, 6 * aspectRatio, 18 * aspectRatio};
     
-    glPushMatrix();
-    glTranslated(8,-2,0);
-    desenhaTrapezio(7.5 * aspectRatio, 4.5 * aspectRatio, 2, 0.561, 0.306, 0.0);
-    glBegin(GL_LINES);
-    glEnd();
-    glPopMatrix();
+    for(int i = 0; i < 4; i++) {
+        glPushMatrix();
+        glTranslated(posicoes[i],-1.5,0);
+        desenhaTrapezio(7.5 * aspectRatio, 4.5 * aspectRatio, 2, 0.561, 0.306, 0.0);
+        glBegin(GL_LINES);
+        glEnd();
+        glPopMatrix();
+    }
 }
 
 
