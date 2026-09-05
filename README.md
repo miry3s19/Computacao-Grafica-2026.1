@@ -5,11 +5,11 @@ Trabalhos de Computação Gráfica, disciplina da graduação em Ciência da Com
 ## Questões propostas
 
 ### 1. O plano de fundo deve ter as seguintes características:
--[ ] a. A tela de fundo consiste em uma horta fixa, com ~~canteiros~~, ~~cercas de madeira~~ e o ~~céu ao fundo~~, **visualizada parcialmente a cada instante do jogo, conforme a movimentação do coelho**;
+-[X] a. A tela de fundo consiste em ~~uma horta fixa~~, com ~~canteiros~~, ~~cercas de madeira~~ e o ~~céu ao fundo~~, ~~visualizada parcialmente a cada instante do jogo, conforme a movimentação do coelho~~;
 
 -[X] b. O cenário deve ser construído a partir de ~~primitivas geométricas: quadriláteros (cercas e canteiros), triângulos (folhagens) e círculos (vegetais ao fundo, sol)~~;
 
--[ ] c. **A mesma tela deve ser visualizada em loop**: quando o coelho chegar ao final da horta, o cenário deve reiniciar de forma imperceptível ao jogador.
+-[X] c. ~~A mesma tela deve ser visualizada em loop~~: quando o coelho chegar ao final da horta, o cenário deve reiniciar de forma imperceptível ao jogador.
 
 ### 2. Implemente o personagem principal (o coelho), que deve se movimentar de forma articulada:
 -[ ] a. O coelho deve correr da esquerda para a direita, movimentando as patas dianteiras e traseiras e as orelhas de forma alternada, simulando o andar característico do animal;

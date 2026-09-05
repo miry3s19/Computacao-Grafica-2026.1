@@ -97,6 +97,9 @@ void display() {
   glutSwapBuffers(); // Evita efeito de "flicker" (piscada) na tela
 }
 
+
+//INTERAÇÕES
+
 void keyboard( unsigned char key, int x, int y )
 {
     switch( key ) {
@@ -107,7 +110,7 @@ void keyboard( unsigned char key, int x, int y )
 display();
 }
 
-void mouse(int button, int action, int x, int y)
+void mouse(int button, int action, int x, int y)//apagar depois??? vamos usar mouse???
 {
   switch(button)
   {
@@ -149,7 +152,7 @@ int main(int argc, char** argv)
   glutInitWindowSize (960, 540);
   glutInitWindowPosition (200, 50);
 
-  glutCreateWindow ("Corre, coelho, corre!");
+  glutCreateWindow ("Corre, coelho, corre!  -- Tecle enter para iniciar ou pausar o jogo --");
 
   init();
 
