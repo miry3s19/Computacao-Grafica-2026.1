@@ -20,9 +20,9 @@ centrados na origem, e organizadas de forma hierárquica (corpo como nó pai das
 -[X] c. Ao acionar uma tecla do teclado, o coelho deve saltar, sendo capaz de transpor cercas e buracos presentes no caminho.
 
 ### 3. Implemente o aparecimento de elementos de bonificação (vegetais, como cenouras, alfaces e rabanetes) que devem ser capturados pelo coelho:
--[ ] a. A cada vez que a tela reinicia o loop, os vegetais devem ser adicionados aleatoriamente à paisagem, ao alcance do coelho, aparecendo à medida que o personagem avança;
+-[X] a. A cada vez que a tela reinicia o loop, os vegetais devem ser adicionados aleatoriamente à paisagem, ao alcance do coelho, aparecendo à medida que o personagem avança;
 
--[ ] b. Quando o coelho colide com um vegetal, este deve desaparecer da tela;
+-[X] b. Quando o coelho colide com um vegetal, este deve desaparecer da tela; (Corrigir colisão antecipada/incorreta)
 
 -[ ] c. Crie um enredo que dê utilidade aos vegetais capturados: eles podem conceder um impulso extra de velocidade (para distanciar-se da raposa), um salto mais alto, ou vidas extras. Use a sua criatividade!
 
