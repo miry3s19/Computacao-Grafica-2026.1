@@ -21,6 +21,14 @@ void init(void);
 void display(void);
 void update (int);
 
+//INFORMAÇÕES DO JOGO
+void desenhaVidas();
+
+//SIDE SCROLLING
+double offsetX = 55.0; 
+double velocidade = 0.1;
+bool jogoRodando = false;
+
 // PRIMITIVAS GEOMÉTRICAS
 void desenhaRetangulo(double, double, float, float, float);
 void desenhaTriangulo(double, double, double, double, double, double, float, float, float);
@@ -36,16 +44,13 @@ void desenhaGrama();
 void desenhaCerca();
 void desenhaHorta();
 
-//INFORMAÇÕES DO JOGO
-void desenhaVidas();
-
 //ELEMENTOS DE BONIFICAÇÃO
 void desenhaAlmeirao();
 void desenhaCenoura();
 void desenhaCouve();
 void desenhaLinhasCouve(float, float, float); 
 
-//APARECIMENTO DOS VEGETAIS
+//APARECIMENTO E DESAPARECIMENTO DOS ELEMENTOS DE BONIFICAÇÃO
 typedef struct vegetal {
     double x;
     double y;
@@ -68,10 +73,7 @@ void desenhaCorpoRaposa();
 
 
 int polygon = 4;
-//SIDE SCROLLING
-double offsetX = 70.0; 
-double velocidade = 0.1;
-bool jogoRodando = false;
+
 
 //ANIMAÇÃO DO COELHO
 float alturaPerna = 0.0;
@@ -171,24 +173,7 @@ void display() {
             }
             glPopMatrix();
         }
-    }
-        
-    
-    /*glPushMatrix();
-    glTranslated(4,-5,0);
-    desenhaAlmeirao();
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslated(7,-5,0);
-    desenhaCenoura();
-    glPopMatrix();
-   
-    glPushMatrix();
-    glTranslated(10,-5,0);
-    desenhaCouve();
-    glPopMatrix();*/
-   
+    }   
    
     glPushMatrix();
     glTranslated(-12,-2,0);
@@ -251,7 +236,7 @@ void update(int valor) {
         atualizaVegetais();
         
         offsetX -= velocidade;
-        printf("%f", offsetX);
+        printf("%f\n", offsetX);
         if (offsetX < -175) offsetX += 245;
 
         animaPerna();
@@ -259,7 +244,7 @@ void update(int valor) {
         atualizaPulo();
         atualizaRaposa();
         
-        //colisaoVegetal();
+        colisaoVegetal();
     }
     glutTimerFunc(16, update, 0);
     glutPostRedisplay();
@@ -555,7 +540,7 @@ void desenhaCouve() {
     desenhaLinhasCouve(0.698f, 0.980f, 0.576f);
 }
 
-//APARECIMENTO DOS VEGETAIS
+//APARECIMENTO E DESAPARECIMENTO DOS ELEMENTOS DE BONIFICAÇÃO
 
 
 void inicializaVegetais() {
@@ -573,23 +558,11 @@ void inicializaVegetais() {
     }
 }
 
-void recriaBloco(int bloco) {
-    double hortasIndex[4] = {-18 * aspectRatio, -6 * aspectRatio, 6 * aspectRatio, 18 * aspectRatio};
-    for(int horta = 0; horta < 4; horta++) {
-        int i = bloco * 4 + horta;
-        vegetais[i].x = hortasIndex[horta];
-        vegetais[i].y = -5;
-        vegetais[i].tipo = (rand() % 3) + 1;
-        vegetais[i].bloco = bloco;
-        vegetais[i].ativo = true;
-    }
-}
-
 void atualizaVegetais() {
     for(int bloco = 0; bloco < 4; bloco++) {
         double posBloco = offsetX + (bloco * 40);
         
-        if(posBloco < -75.0) {
+        if(posBloco < -80.0 || posBloco > 160.0) {
             // Recicla APENAS este bloco
             for(int horta = 0; horta < 4; horta++) {
                 int i = bloco * 4 + horta;
@@ -602,24 +575,24 @@ void atualizaVegetais() {
 
 void colisaoVegetal() {
     double coelhoX = -12.0;
-    double coelhoY = -3.5 + altura;
-    double raio= 3.0;
+    double coelhoY = -2.0 + altura;
+    double raio = 3.7;  
     
     for(int i = 0; i < 16; i++) {
         if(!vegetais[i].ativo) continue;
         
         double vegetalX = offsetX + (vegetais[i].bloco * 40) + vegetais[i].x;
-        double vegetalY = -5;
+        double vegetalY = vegetais[i].y;  // -5.0
         
         double dx = coelhoX - vegetalX;
         double dy = coelhoY - vegetalY;
         double distancia = sqrt(dx*dx + dy*dy);
         
-        if(distancia < raio) vegetais[i].ativo = false;
-        
+        if(distancia < raio) {
+            vegetais[i].ativo = false;  
+        }
     }
 }
-
 
 //ELEMENTOS DE PERSONAGENS
 
