@@ -11,6 +11,8 @@ cores: https://mycolor.space/?hex=%2385C6F0&sub=1 (Pode mudar a paleta à vontad
 #include <GL/glut.h>
 #include <cmath>
 #include <cstdlib>
+#include <ctime>
+#include <cstdio>
 
 const double PI = 3.14159;
 const double aspectRatio = 960.0 / 540.0; //Mantém a proporção dos desenhos para 16:9. Multiplicar tudo que depende de x por aspectRatio.
@@ -42,6 +44,22 @@ void desenhaAlmeirao();
 void desenhaCenoura();
 void desenhaCouve();
 void desenhaLinhasCouve(float, float, float); 
+
+//APARECIMENTO DOS VEGETAIS
+typedef struct vegetal {
+    double x;
+    double y;
+    int tipo;
+    int bloco;
+    bool ativo;
+} vegetal;
+
+vegetal vegetais[16];
+
+void inicializaVegetais();
+void recriaBloco(int);
+void atualizaVegetais();
+void colisaoVegetal();
 
 //ELEMENTOS DE PERSONAGENS
 void desenhaCorpoCoelho();
@@ -126,6 +144,28 @@ void display() {
         glTranslated(0, -4, 0);
         desenhaHorta();
         glPopMatrix();
+        
+        for(int j = 0; j < 16; j++) {
+            if(vegetais[j].ativo && vegetais[j].bloco == i) { 
+                glPushMatrix();
+                glTranslated(vegetais[j].x, vegetais[j].y, 0);
+                
+                switch(vegetais[j].tipo) {
+                    case 1:
+                        desenhaAlmeirao();
+                        break;
+                    case 2:
+                        desenhaCenoura();
+                        break;
+                    case 3:
+                        desenhaCouve();
+                        break;
+                    default:
+                        break;
+                }
+                glPopMatrix();
+            }
+        }
                 
         glPopMatrix();
     }
@@ -211,6 +251,8 @@ void update(int valor) {
         animaOrelha();
         atualizaPulo();
         atualizaRaposa();
+        atualizaVegetais();
+        colisaoVegetal();
     }
     glutTimerFunc(16, update, 0);
     glutPostRedisplay();
@@ -218,6 +260,7 @@ void update(int valor) {
 
 int main(int argc, char** argv)
 {
+  srand(time(NULL));
   glutInit(&argc, argv);
   glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB); //GLUT_DOUBLE evita efeito de "flicker" (piscada) na tela
 
@@ -228,6 +271,8 @@ int main(int argc, char** argv)
 
   init();
 
+  inicializaVegetais();
+  
   glutDisplayFunc(display);
   glutTimerFunc(0, update, 0);
   
@@ -505,6 +550,61 @@ void desenhaCouve() {
     desenhaLinhasCouve(0.698f, 0.980f, 0.576f);
 }
 
+//APARECIMENTO DOS VEGETAIS
+
+
+void inicializaVegetais() {
+    double hortasIndex[4] = {-18 * aspectRatio, -6 * aspectRatio, 6 * aspectRatio, 18 * aspectRatio};
+    
+    for(int bloco = 0; bloco < 4; bloco++) {
+        recriaBloco(bloco);
+    }
+}
+
+void recriaBloco(int bloco) {
+    double hortasIndex[4] = {-18 * aspectRatio, -6 * aspectRatio, 6 * aspectRatio, 18 * aspectRatio};
+    for(int horta = 0; horta < 4; horta++) {
+        int i = bloco * 4 + horta;
+        vegetais[i].x = hortasIndex[horta];
+        vegetais[i].y = -5;
+        vegetais[i].tipo = (rand() % 3) + 1;
+        vegetais[i].bloco = bloco;
+        vegetais[i].ativo = true;
+    }
+}
+
+void atualizaVegetais() {
+    for(int bloco = 0; bloco < 4; bloco++) {
+        double posBloco = offsetX + (bloco * 40);
+        if(posBloco < -35.0) {
+            for(int horta = 0; horta < 4; horta++) {
+                int i = bloco * 4 + horta;
+                vegetais[i].tipo = (rand() % 3) + 1;
+                vegetais[i].ativo = true;
+            }
+        }
+    }
+}
+
+void colisaoVegetal() {
+    double coelhoX = -12.0;
+    double coelhoY = -3.5 + altura;
+    double raio= 3.0;
+    
+    for(int i = 0; i < 16; i++) {
+        if(!vegetais[i].ativo) continue;
+        
+        double vegetalX = offsetX + (vegetais[i].bloco * 40) + vegetais[i].x;
+        double vegetalY = -5;
+        
+        double dx = coelhoX - vegetalX;
+        double dy = coelhoY - vegetalY;
+        double distancia = sqrt(dx*dx + dy*dy);
+        
+        if(distancia < raio) vegetais[i].ativo = false;
+        
+    }
+}
 
 
 //ELEMENTOS DE PERSONAGENS
