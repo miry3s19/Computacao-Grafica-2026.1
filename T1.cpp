@@ -21,9 +21,6 @@ void init(void);
 void display(void);
 void update (int);
 
-//INFORMAÇÕES DO JOGO
-void desenhaVidas();
-
 //SIDE SCROLLING
 double offsetX = 55.0; 
 double velocidade = 0.1;
@@ -58,6 +55,12 @@ typedef struct vegetal {
     int bloco;
     bool ativo;
 } vegetal;
+
+//SISTEMA DE VIDAS E TEXTOS
+int vidas = 5;
+void textoGameOver(float, float);
+void textoVidas(float, float);
+void textoPausa(float, float);
 
 vegetal vegetais[16];
 int blocoAtual = 0; 
@@ -185,6 +188,15 @@ void display() {
     desenhaCorpoRaposa();
     glPopMatrix();
 
+    glColor3f(0,0,0);
+    textoVidas(6.0 * aspectRatio, 5.0 * aspectRatio);
+    glColor3f(0,0,0);
+    if(vidas <= 0) {
+        textoGameOver(-4.0 * aspectRatio, 2.0);
+    }
+    if(!jogoRodando && vidas > 0){
+        textoPausa(-3.0 * aspectRatio, 2.0);
+    }
  // Libera o buffer de comando de desenho para fazer o desenho acontecer o mais rápido possível.
   glFlush();
   glutSwapBuffers(); // Evita efeito de "flicker" (piscada) na tela
@@ -202,6 +214,19 @@ void keyboard( unsigned char key, int x, int y )
         case 32: //pra adicionar o pulo
             iniciaPulo();
         break;
+        case 'r':
+        case 'R':
+            if(vidas == 0) {
+                vidas = 5;
+                jogoRodando = true;
+                offsetX = 0.0;
+                raposaVisivel = false;
+                raposaX = 30.0;
+                altura = 0.0;
+                coelhoPulando = false;
+                inicializaVegetais();
+            }
+            break;
     }
 display();
 }
@@ -778,15 +803,52 @@ void atualizaRaposa(){
         int numeroAleatorio = rand() % 100;
 
         if (numeroAleatorio < 1){
-            raposaX = 30.0; 
+            raposaX = 30.0;
             raposaY = -2.0;
             raposaVisivel = true;
         }
     }
     else{
-        raposaX -= 0.4;  
+        raposaX -= 0.4;
+
+        double coelhoX = -12.0;
+        if(fabs(coelhoX - raposaX) < 2.0 && altura <= 0.1){
+            vidas--;
+            if(vidas == 0){
+                jogoRodando = false;
+            }
+            raposaVisivel = false;
+        }
+
         if(raposaX < -30.0){
             raposaVisivel = false;
         }
+    }
+}
+
+//TEXTO (deu bom!!)
+
+void textoGameOver(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "GAME OVER! Suas vidas acabaram :( Aperte 'R' para reiniciar.";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoPausa(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "JOGO PAUSADO";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoVidas(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[10];
+    sprintf(texto, "Vidas: %d", vidas);
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
     }
 }
