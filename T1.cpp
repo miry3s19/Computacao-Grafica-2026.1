@@ -55,6 +55,7 @@ typedef struct vegetal {
 } vegetal;
 
 vegetal vegetais[16];
+int blocoAtual = 0; 
 
 void inicializaVegetais();
 void recriaBloco(int);
@@ -68,7 +69,7 @@ void desenhaCorpoRaposa();
 
 int polygon = 4;
 //SIDE SCROLLING
-double offsetX = 0.0; 
+double offsetX = 70.0; 
 double velocidade = 0.1;
 bool jogoRodando = false;
 
@@ -102,7 +103,7 @@ void init(void)
   glMatrixMode (GL_PROJECTION);
   glLoadIdentity();
   
-  //glOrtho (-100 * aspectRatio, 100 * aspectRatio, -100, 100, -1, 1); //Para ver o mundo completo
+  //glOrtho (-80 * aspectRatio, 100 * aspectRatio, -50, 50, -1, 1); //Para ver o mundo completo
   glOrtho (-10 * aspectRatio, 10 * aspectRatio, -10, 10, -1, 1); //Para ver o viewport
 }
 
@@ -123,7 +124,7 @@ void display() {
     
     
     
-    for(int i = 0; i < 4; i++) {
+    for(int i = -2; i < 6; i++) {
         glPushMatrix();
         glTranslated(offsetX + (i * 40), 0, 0);  // i=0: posição atual, i=1: +40 adiante
         
@@ -139,36 +140,39 @@ void display() {
         desenhaCerca();
         glPopMatrix();
         
+        if(i >= 0 && i <= 4) {
        // Horta
         glPushMatrix();
         glTranslated(0, -4, 0);
         desenhaHorta();
         glPopMatrix();
-        
-        for(int j = 0; j < 16; j++) {
-            if(vegetais[j].ativo && vegetais[j].bloco == i) { 
-                glPushMatrix();
-                glTranslated(vegetais[j].x, vegetais[j].y, 0);
-                
-                switch(vegetais[j].tipo) {
-                    case 1:
-                        desenhaAlmeirao();
-                        break;
-                    case 2:
-                        desenhaCenoura();
-                        break;
-                    case 3:
-                        desenhaCouve();
-                        break;
-                    default:
-                        break;
-                }
-                glPopMatrix();
-            }
         }
-                
+                        
         glPopMatrix();
     }
+    
+    for(int j = 0; j < 16; j++) {
+        if(vegetais[j].ativo) { 
+            glPushMatrix();
+            glTranslated(offsetX + (vegetais[j].bloco * 40) + vegetais[j].x, vegetais[j].y, 0);
+            
+            switch(vegetais[j].tipo) {
+                case 1:
+                    desenhaAlmeirao();
+                    break;
+                case 2:
+                    desenhaCenoura();
+                    break;
+                case 3:
+                    desenhaCouve();
+                    break;
+                default:
+                    break;
+            }
+            glPopMatrix();
+        }
+    }
+        
     
     /*glPushMatrix();
     glTranslated(4,-5,0);
@@ -244,15 +248,18 @@ void mouse(int button, int action, int x, int y)//apagar depois??? vamos usar mo
 
 void update(int valor) {
     if(jogoRodando){
+        atualizaVegetais();
+        
         offsetX -= velocidade;
-        if (offsetX < -40) offsetX += 40;
+        printf("%f", offsetX);
+        if (offsetX < -175) offsetX += 245;
 
         animaPerna();
         animaOrelha();
         atualizaPulo();
         atualizaRaposa();
-        atualizaVegetais();
-        colisaoVegetal();
+        
+        //colisaoVegetal();
     }
     glutTimerFunc(16, update, 0);
     glutPostRedisplay();
@@ -423,8 +430,6 @@ void desenhaHorta() {
         glPushMatrix();
         glTranslated(posicoes[i],-1.5,0);
         desenhaTrapezio(7.5 * aspectRatio, 4.5 * aspectRatio, 2, 0.561, 0.306, 0.0);
-        glBegin(GL_LINES);
-        glEnd();
         glPopMatrix();
     }
 }
@@ -557,7 +562,14 @@ void inicializaVegetais() {
     double hortasIndex[4] = {-18 * aspectRatio, -6 * aspectRatio, 6 * aspectRatio, 18 * aspectRatio};
     
     for(int bloco = 0; bloco < 4; bloco++) {
-        recriaBloco(bloco);
+        for(int horta = 0; horta < 4; horta++) {
+            int i = bloco * 4 + horta;
+            vegetais[i].x = hortasIndex[horta];  // Posição relativa ao bloco
+            vegetais[i].y = -5;
+            vegetais[i].tipo = (rand() % 3) + 1;
+            vegetais[i].bloco = bloco;
+            vegetais[i].ativo = true;
+        }
     }
 }
 
@@ -576,7 +588,9 @@ void recriaBloco(int bloco) {
 void atualizaVegetais() {
     for(int bloco = 0; bloco < 4; bloco++) {
         double posBloco = offsetX + (bloco * 40);
-        if(posBloco < -35.0) {
+        
+        if(posBloco < -75.0) {
+            // Recicla APENAS este bloco
             for(int horta = 0; horta < 4; horta++) {
                 int i = bloco * 4 + horta;
                 vegetais[i].tipo = (rand() % 3) + 1;
@@ -803,5 +817,3 @@ void atualizaRaposa(){
         }
     }
 }
-
-//ELEMENTOS DE BONIFICAÇÃO
