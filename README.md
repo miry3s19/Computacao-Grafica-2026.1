@@ -24,20 +24,22 @@ centrados na origem, e organizadas de forma hierárquica (corpo como nó pai das
 
 -[X] b. Quando o coelho colide com um vegetal, este deve desaparecer da tela; (Corrigir colisão antecipada/incorreta)
 
--[ ] c. Crie um enredo que dê utilidade aos vegetais capturados: eles podem conceder um impulso extra de velocidade (para distanciar-se da raposa), um salto mais alto, ou vidas extras. Use a sua criatividade!
+-[X] c. Crie um enredo que dê utilidade aos vegetais capturados: eles podem conceder um impulso extra de velocidade (para distanciar-se da raposa), um salto mais alto, ou vidas extras. Use a sua criatividade! (Poderes: imunidade, ganhar vida extra e ganhar pontos extras);
 
 ### 4. Implemente uma raposa que persegue o coelho pelo chão:
--[ ] a. A raposa deve entrar na tela periodicamente, correndo no chão em direção ao coelho a uma velocidade próxima à do jogador, obrigando-o a colher vegetais que concedam impulso ou a saltar obstáculos para escapar;
+-[X] a. A raposa deve entrar na tela periodicamente, correndo no chão em direção ao coelho a uma velocidade próxima à do jogador, obrigando-o a colher vegetais que concedam impulso ou a saltar obstáculos para escapar;
 
--[ ] b. Caso a raposa alcance o coelho (colisão), o jogador perde uma vida, um poder adquirido ou o jogo é encerrado; crie um enredo que justifique essa perda.
+-[X] b. Caso a raposa alcance o coelho (colisão), **o jogador perde uma vida**, um poder adquirido ou o jogo é encerrado; crie um enredo que justifique essa perda.
 
 ## Questões bônus
 ### 1. Implemente elementos para tornar a tela de fundo um pouco mais dinâmica. Exemplos:
--[ ] a. Nuvens se movimentando;
+-[X] a. Nuvens e montanhas se movimentando; (efeito parallax)
 
 -[ ] b. Borboletas ou abelhas sobrevoando os canteiros;
 
 -[ ] c. Cor do céu se modificando em função do tempo de jogo (amanhecer/entardecer).
+
+
 
 ### 2. Implemente a capacidade do coelho de se abaixar e entrar em uma toca (buraco no cenário), ficando temporariamente escondido e a salvo da raposa;
 

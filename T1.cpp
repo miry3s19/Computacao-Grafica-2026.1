@@ -23,8 +23,14 @@ void update (int);
 
 //SIDE SCROLLING
 double offsetX = 55.0; 
-double velocidade = 0.1;
+double velocidade = 0.15;
 bool jogoRodando = false;
+
+double offsetNuvens = 40.0;
+double velocidadeNuvens = 0.03;
+
+double offsetMontanhas = 40.0;
+double velocidadeMontanhas = 0.07;
 
 // PRIMITIVAS GEOMÉTRICAS
 void desenhaRetangulo(double, double, float, float, float);
@@ -35,6 +41,8 @@ void desenhaLinhaCentro(float, float, float, float, float, float, float, float, 
 
 //ELEMENTOS DO CENARIO: CÉU
 void desenhaSol();
+void desenhaNuvem(double, double, double);
+void desenhaMontanha(double, double, double, double, float, float, float);
 
 //ELEMENTOS DO CENARIO: CHÃO
 void desenhaGrama();
@@ -56,24 +64,28 @@ typedef struct vegetal {
     bool ativo;
 } vegetal;
 
-//SISTEMA DE VIDAS E TEXTOS
+vegetal vegetais[16];
+void inicializaVegetais();
+void atualizaVegetais();
+void colisaoVegetal();
+
+//SISTEMA DE VIDAS E PONTOS
 int vidas = 5;
+int pontos = 0;
+
+//TEXTOS
 void textoGameOver(float, float);
 void textoVidas(float, float);
 void textoPausa(float, float);
+void textoPontos(float, float);
+void textoImune(float, float);
 
-vegetal vegetais[16];
-int blocoAtual = 0; 
-
-void inicializaVegetais();
-void recriaBloco(int);
-void atualizaVegetais();
-void colisaoVegetal();
 
 //ELEMENTOS DE PERSONAGENS
 void desenhaCorpoCoelho();
 void desenhaCorpoRaposa();
-
+bool imune = false;
+int tempoImune = 180;
 
 int polygon = 4;
 
@@ -127,6 +139,38 @@ void display() {
     desenhaSol();
     glPopMatrix();
     
+  // Montanhas
+    glPushMatrix();
+    glTranslated(offsetMontanhas, -2, 0);
+    
+    for(int bloco = -2; bloco <= 2; bloco++) {
+        double baseX = bloco * 40.0;
+        
+        desenhaMontanha(baseX - 15 * aspectRatio, 0, 12 * aspectRatio, 5.5, 0.60, 0.24, 0.43);
+        desenhaMontanha(baseX - 5 * aspectRatio, 0, 10 * aspectRatio, 4.0, 0.58, 0.47, 0.71);
+        desenhaMontanha(baseX + 5 * aspectRatio, 0, 14 * aspectRatio, 6.0, 0.55, 0.57, 0.82);
+        desenhaMontanha(baseX + 15 * aspectRatio, 0, 11 * aspectRatio, 4.5, 0.69, 0.47, 0.61);
+        desenhaMontanha(baseX + 22 * aspectRatio, 0, 8 * aspectRatio, 3.0, 0.78, 0.41, 0.65);
+    }
+    
+    glPopMatrix();
+    
+  // Nuvens
+    glPushMatrix();
+    glTranslated(offsetNuvens, 0, 0);
+    
+    for(int bloco = -2; bloco < 6; bloco++) {
+        double baseX = bloco * 40.0;
+        
+        desenhaNuvem(baseX - 18 * aspectRatio, 7 + 0.5 * sin(bloco), 1.0);
+        desenhaNuvem(baseX - 10 * aspectRatio, 8.5 + 0.3 * cos(bloco * 0.7), 0.8);
+        desenhaNuvem(baseX - 2 * aspectRatio, 6.5 + 0.4 * sin(bloco * 1.2), 1.2);
+        desenhaNuvem(baseX + 6 * aspectRatio, 7.8 + 0.3 * sin(bloco * 0.5), 0.9);
+        desenhaNuvem(baseX + 14 * aspectRatio, 6.2 + 0.4 * cos(bloco * 0.8), 0.7);
+        desenhaNuvem(baseX + 22 * aspectRatio, 8.0 + 0.2 * sin(bloco * 1.5), 0.5);
+    }
+
+    glPopMatrix();
     
     
     for(int i = -2; i < 6; i++) {
@@ -189,13 +233,18 @@ void display() {
     glPopMatrix();
 
     glColor3f(0,0,0);
-    textoVidas(6.0 * aspectRatio, 5.0 * aspectRatio);
+    textoVidas(6.0 * aspectRatio, 9.0);
+    glColor3f(0,0,0);
+    textoPontos(6.0 * aspectRatio, 8.0);
     glColor3f(0,0,0);
     if(vidas <= 0) {
         textoGameOver(-4.0 * aspectRatio, 2.0);
     }
     if(!jogoRodando && vidas > 0){
         textoPausa(-3.0 * aspectRatio, 2.0);
+    }
+    if(imune){
+        textoImune(-3.0 * aspectRatio, 5.0);
     }
  // Libera o buffer de comando de desenho para fazer o desenho acontecer o mais rápido possível.
   glFlush();
@@ -218,8 +267,11 @@ void keyboard( unsigned char key, int x, int y )
         case 'R':
             if(vidas == 0) {
                 vidas = 5;
+                pontos = 0;
                 jogoRodando = true;
                 offsetX = 0.0;
+                offsetNuvens = 0.0;
+                offsetMontanhas = 0.0;
                 raposaVisivel = false;
                 raposaX = 30.0;
                 altura = 0.0;
@@ -263,11 +315,22 @@ void update(int valor) {
         offsetX -= velocidade;
         printf("%f\n", offsetX);
         if (offsetX < -175) offsetX += 245;
+        
+        offsetNuvens -= velocidadeNuvens;
+        if (offsetNuvens < -40) offsetNuvens += 80;
+        
+        offsetMontanhas -= velocidadeMontanhas;
+        if (offsetMontanhas < -40) offsetMontanhas += 80;
 
         animaPerna();
         animaOrelha();
         atualizaPulo();
         atualizaRaposa();
+        
+        if(imune) {
+            tempoImune--;
+            if(tempoImune <= 0) imune = false;
+        }
         
         colisaoVegetal();
     }
@@ -375,24 +438,68 @@ void desenhaLinhaCentro(float x1, float y1, float x2, float y2, float x3, float 
 
 
 //ELEMENTOS DO CENÁRIO: CÉU
-
 void desenhaSol(){
     // Círculo (sol)
     desenhaCirculo(1.7,0.976, 0.973, 0.443);
+}
 
-    // Raios solares (linhas) [talvez eu implemente depois]
-    /*glPushMatrix();
-    glScaled(2,2,1);
-    glBegin(GL_LINES);
-    glColor3f(1,1,0.85);
-      for(int i=0; i<12; i++){
-        float angle = (2*M_PI/12)*i;
-        glVertex3f(0,0,0);
-        glVertex3f(cos(angle), sin(angle),0);
-      }*/
-    //glEnd();
-    //glPopMatrix();
+void desenhaNuvem(double x, double y, double escala) {
+    glPushMatrix();
+    glTranslated(x, y, 0);
+    glScaled(escala, escala, 1);
+    glColor3f(1.0, 1.0, 1.0);
+    
+    desenhaCirculo(1.5, 1.0, 1.0, 1.0);
+    
+    glPushMatrix();
+    glTranslated(-1.8, 0.5, 0);
+    desenhaCirculo(1.2, 1.0, 1.0, 1.0);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslated(1.8, 0.3, 0);
+    desenhaCirculo(1.3, 1.0, 1.0, 1.0);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslated(-1.0, 1.2, 0);
+    desenhaCirculo(1.0, 1.0, 1.0, 1.0);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslated(1.0, 1.0, 0);
+    desenhaCirculo(1.1, 1.0, 1.0, 1.0);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslated(0.0, 1.5, 0);
+    desenhaCirculo(0.9, 1.0, 1.0, 1.0);
+    glPopMatrix();
+    
+    glPopMatrix();
+}
 
+void desenhaMontanha(double x, double y, double largura, double altura, float r, float g, float b) {
+    glPushMatrix();
+    glTranslated(x, y, 0);
+    glColor3f(r, g, b);
+    
+    desenhaTriangulo(
+        -largura/2, 0,    
+        largura/2, 0,     
+        0, altura,        
+        r, g, b
+    );
+    
+    desenhaTriangulo(
+        -largura/6, altura * 0.7,
+        largura/6, altura * 0.7,
+        0, altura,
+        1.0, 1.0, 1.0  // Branco
+    );
+    
+    glPopMatrix();
+    
 }
 
 //ELEMENTOS DO CENÁRIO: CHÃO
@@ -615,6 +722,22 @@ void colisaoVegetal() {
         
         if(distancia < raio) {
             vegetais[i].ativo = false;  
+            switch(vegetais[i].tipo) {
+                case 1: // Almeirao
+                    pontos++;
+                    vidas++;
+                    break;
+                case 2: // Cenoura
+                    pontos = pontos + 10;
+                    break;
+                case 3: // Couve
+                    pontos++;
+                    imune = true;
+                    tempoImune = 180;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -812,7 +935,7 @@ void atualizaRaposa(){
         raposaX -= 0.4;
 
         double coelhoX = -12.0;
-        if(fabs(coelhoX - raposaX) < 2.0 && altura <= 0.1){
+        if(fabs(coelhoX - raposaX) < 2.0 && altura <= 0.1 && !imune){
             vidas--;
             if(vidas == 0){
                 jogoRodando = false;
@@ -848,6 +971,23 @@ void textoVidas(float x, float y) {
     glRasterPos2f(x, y);
     char texto[10];
     sprintf(texto, "Vidas: %d", vidas);
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoPontos(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[10];
+    sprintf(texto, "Pontos: %d", pontos);
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoImune(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "IMUNIDADE ATIVADA!";
     for(int i = 0; texto[i] != '\0'; i++) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
     }
