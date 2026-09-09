@@ -1,13 +1,3 @@
-/*
-
-cores: https://mycolor.space/?hex=%2385C6F0&sub=1 (Pode mudar a paleta à vontade, só usei como base)
-
-
-*/
-
-
-
-
 #include <GL/glut.h>
 #include <cmath>
 #include <cstdlib>
@@ -86,9 +76,6 @@ void desenhaCorpoCoelho();
 void desenhaCorpoRaposa();
 bool imune = false;
 int tempoImune = 180;
-
-int polygon = 4;
-
 
 //ANIMAÇÃO DO COELHO
 float alturaPerna = 0.0;
@@ -281,31 +268,6 @@ void keyboard( unsigned char key, int x, int y )
             break;
     }
 display();
-}
-
-void mouse(int button, int action, int x, int y)//apagar depois??? vamos usar mouse???
-{
-  switch(button)
-  {
-    case GLUT_LEFT_BUTTON:
-    {
-    	polygon = 3;
-      break;
-    }
-    case GLUT_MIDDLE_BUTTON:
-    {
-
-      break;
-    }
-    case GLUT_RIGHT_BUTTON:
-    {
-    	polygon = 4;
-      break;
-    }
-    default: break;
-  }
-
-  display();
 }
 
 void update(int valor) {
@@ -949,7 +911,7 @@ void atualizaRaposa(){
     }
 }
 
-//TEXTO (deu bom!!)
+//TEXTO
 
 void textoGameOver(float x, float y) {
     glRasterPos2f(x, y);
