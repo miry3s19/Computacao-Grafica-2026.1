@@ -275,7 +275,7 @@ void update(int valor) {
         atualizaVegetais();
         
         offsetX -= velocidade;
-        printf("%f\n", offsetX);
+        //printf("%f\n", offsetX);
         if (offsetX < -175) offsetX += 245;
         
         offsetNuvens -= velocidadeNuvens;
