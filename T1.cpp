@@ -322,9 +322,6 @@ int main(int argc, char** argv)
   // A função de teclado deve possuir o seguinte protótipo:
   glutKeyboardFunc(keyboard);
 
-
-  glutMouseFunc(mouse);
-
   glutMainLoop();
 
   return 0;
