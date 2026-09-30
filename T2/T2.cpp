@@ -154,19 +154,10 @@ void specialKeyFunction(int key, int x, int y) {
             personagemPosZ += velocidade * cos(rad);
             break;
         case GLUT_KEY_LEFT:
-            if(modoCamera==0){
-              personagemAngulo += velocidadeRotacao;  
-            } else if(modoCamera == 1){
-              personagemAngulo -= velocidadeRotacao; 
-            }
-            
+              personagemAngulo -= velocidadeRotacao;
             break;
         case GLUT_KEY_RIGHT:
-            if(modoCamera==0){
-              personagemAngulo -= velocidadeRotacao;  
-            } else if(modoCamera == 1){
               personagemAngulo += velocidadeRotacao; 
-            }
             break;
     }
     glutPostRedisplay();
@@ -586,6 +577,13 @@ void desenhaPersonagem() {
     }
 
 void display() {
+    atualizaVegetais();
+    colisaoVegetal();
+    
+    if (imune) {
+        tempoImune--;
+        if (tempoImune <= 0) imune = false;
+    }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
@@ -597,7 +595,7 @@ void display() {
             cameraPrimeiraPessoa();
             break;
     }
-    atualizaVegetais();
+    
     desenhaChao();
     desenhaVegetais();
     desenhaCoelho();
