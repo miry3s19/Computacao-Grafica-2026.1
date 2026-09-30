@@ -45,12 +45,6 @@ float camAltura = 1.0f;
 float cameraRotacaoY = 0.0;
 float cameraRaio = 25.0;
 
-// Chão
-float chaoDeslocX = 0.0f;
-float chaoDeslocZ = 0.0f;
-float chaoCelula = 2.0f;
-int chaoNumCelulas = 20;
-
 // Texturas
 GLuint texID[2]; // 0 = chão, 1 = personagem
 char* textureFileNames[2] = {
@@ -277,38 +271,23 @@ void cameraPrimeiraPessoa() {
 //Cenário
 
 void desenhaChao() {
-    glPushMatrix();
-
-    chaoDeslocX = floor(personagemPosX / chaoCelula) * chaoCelula;
-    chaoDeslocZ = floor(personagemPosZ / chaoCelula) * chaoCelula;
-    glTranslatef(chaoDeslocX, 0.0f, chaoDeslocZ);
-
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texID[0]);
 
-    for (int i = -chaoNumCelulas; i < chaoNumCelulas; i++) {
-        for (int j = -chaoNumCelulas; j < chaoNumCelulas; j++) {
-            float x1 = i * chaoCelula;
-            float z1 = j * chaoCelula;
-            float x2 = (i + 1) * chaoCelula;
-            float z2 = (j + 1) * chaoCelula;
-
-            glBegin(GL_QUADS);
-                glNormal3f(0.0, 1.0, 0.0);
-                glTexCoord2f(0.0, 0.0);
-                glVertex3f(x1, 0.0f, z1);
-                glTexCoord2f(1.0, 0.0);
-                glVertex3f(x2, 0.0f, z1);
-                glTexCoord2f(1.0, 1.0);
-                glVertex3f(x2, 0.0f, z2);
-                glTexCoord2f(0.0, 1.0);
-                glVertex3f(x1, 0.0f, z2);
-            glEnd();
-        }
-    }
+    float tamanho = 200.0f; // 200x200 cobre -100 ate +100
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        glTexCoord2f(0.0f, 0.0f); 
+        glVertex3f(-tamanho, 0.0f, -tamanho);
+        glTexCoord2f(50.0f, 0.0f); 
+        glVertex3f( tamanho, 0.0f, -tamanho);
+        glTexCoord2f(50.0f, 50.0f); 
+        glVertex3f( tamanho, 0.0f,  tamanho);
+        glTexCoord2f(0.0f, 50.0f); 
+        glVertex3f(-tamanho, 0.0f,  tamanho);
+    glEnd();
 
     glDisable(GL_TEXTURE_2D);
-    glPopMatrix();
 }
 
 //Personagens
