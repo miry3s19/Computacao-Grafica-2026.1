@@ -308,6 +308,19 @@ O deslocamento para frente e para trás deve respeitar a direção para a qual o
 
 #### Implementação
 
+##### Variáveis de controle internas
+
+```cpp
+float velocidade = 0.2;
+float velocidadeRotacao = 5.0;
+float rad = personagemAngulo * M_PI / 180.0;
+```
+- velocidade: determina a velocidade de deslocamento do personagem, nesse caso é 0.2.
+- velocidadeRotacao: determina a velocidade de rotação do personagem, nesse caso é 5.0.
+- rad: converte o angulo atual do personagem para radianos, porque sin() e cos() exigem valores em radiano.
+
+##### Função principal
+
 ```cpp
 void specialKeyFunction(int key, int x, int y) {
     float velocidade = 0.2;
@@ -335,6 +348,60 @@ void specialKeyFunction(int key, int x, int y) {
 ```
 
 *O que o código faz?*
+
+-Componentes:
+
+sin(rad) fornece a componente horizontal (eixo X) da direção.
+cos(rad) fornece a componente vertical (eixo Z) da direção.
+
+-Seta pra cima:
+
+```cpp
+case GLUT_KEY_UP:
+        personagemPosX += velocidade * sin(rad);
+        personagemPosZ -= velocidade * cos(rad);
+        break;
+```
+
+Move o personagem para frente na direção que ele está olhando. Para isso, a função soma a posição do personagem em X com velocidade * sin(rad) e  subtrai a posição do personagem em Z com velocidade * cos(rad).
+
+-Seta pra baixo:
+
+```cpp
+case GLUT_KEY_DOWN:
+        personagemPosX -= velocidade * sin(rad);
+        personagemPosZ += velocidade * cos(rad);
+        break;
+```
+
+Move o personagem para trás na direção que ele está olhando. Para isso, a função subtrai a posição do personagem em X e soma a posição do personagem em Z com velocidade * cos(rad).
+
+-Seta pra esquerda:
+
+```cpp
+case GLUT_KEY_LEFT:
+        personagemAngulo -= velocidadeRotacao;
+        break;
+```
+Rotaciona o personagem no sentido anti-horário diminuindo o ângulo atual do personagem.
+
+-Seta pra direita:
+
+```cpp
+case GLUT_KEY_LEFT:
+        personagemAngulo += velocidadeRotacao;
+        break;
+```
+Rotaciona o personagem no sentido horário aumentando o ângulo atual do personagem.
+
+- Atualiza a tela
+
+```cpp
+glutPostRedisplay();
+```
+
+Por fim, redesenha a tela com as mudanças realizadas.
+
 
 ### Questão 04 - Alternância da câmera
 
