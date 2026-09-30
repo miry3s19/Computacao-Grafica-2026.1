@@ -30,13 +30,19 @@ Vegetal vegetais[NUM_VEGETAIS];
 
 float offsetX = 0.0f;
 
+// Sistema de vidas e pontos
+int vidas = 5;
+int pontos = 0;
+bool imune = false;
+int tempoImune = 180;
+
 // Câmera
 int modoCamera = 0; // 0 = visão geral, 1 = primeira pessoa
 float camDistancia = 2.0f;
 float camAltura = 1.0f;
 
 // Rotação da Câmera
-float cameraRoacaoY = 0.0;
+float cameraRotacaoY = 0.0;
 float cameraRaio = 25.0;
 
 // Chão
@@ -122,9 +128,11 @@ void keyboardChangeCamera(unsigned char key, int x, int y) {
             exit(0);
             break;
         case 'r':
-            cameraRoacaoY += 15.0;
+        case 'R':
+            cameraRotacaoY += 15.0;
             break;
         case 'c':
+        case 'C':
             modoCamera = (modoCamera + 1) % 2;
             break;
     }
@@ -146,10 +154,19 @@ void specialKeyFunction(int key, int x, int y) {
             personagemPosZ += velocidade * cos(rad);
             break;
         case GLUT_KEY_LEFT:
-            personagemAngulo -= velocidadeRotacao;
+            if(modoCamera==0){
+              personagemAngulo += velocidadeRotacao;  
+            } else if(modoCamera == 1){
+              personagemAngulo -= velocidadeRotacao; 
+            }
+            
             break;
         case GLUT_KEY_RIGHT:
-            personagemAngulo += velocidadeRotacao;
+            if(modoCamera==0){
+              personagemAngulo -= velocidadeRotacao;  
+            } else if(modoCamera == 1){
+              personagemAngulo += velocidadeRotacao; 
+            }
             break;
     }
     glutPostRedisplay();
@@ -159,7 +176,7 @@ void specialKeyFunction(int key, int x, int y) {
 
 void cameraVisaoGeral() {
 
-    float rad = cameraRoacaoY * M_PI / 180;
+    float rad = cameraRotacaoY * M_PI / 180;
 
     float camX = cameraRaio * sin(rad);
     float camZ = cameraRaio * cos(rad);
@@ -383,32 +400,31 @@ void desenhaPersonagem() {
 
     //Elementos de bonificação
 
-void desenhaCenoura3D() {
-    //Raiz
-    float corRaiz[] = { 0.97f, 0.60f, 0.09f, 1.0f };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corRaiz);
+    void desenhaCenoura3D() {
+        //Raiz
+        float corRaiz[] = { 0.97f, 0.60f, 0.09f, 1.0f };
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corRaiz);
 
-    glPushMatrix();
-    glTranslatef(0.0f, 0.20f, 0.0f);
-    glRotatef(180.0f, 1.0f, 0.0f, 0.0f);   // ponta para baixo
-    glutSolidCone(0.12, 0.4, 12, 12);
-    glPopMatrix();
-
-    // Folhas
-    float corFolha[] = { 0.0f, 0.28f, 0.23f, 1.0f };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corFolha);
-    for (int i = 0; i < 3; i++) {
         glPushMatrix();
-        glTranslatef(0.0f, 0.40f, 0.0f);           
-        glRotatef(i * 120.0f, 0.0f, 1.0f, 0.0f);   
-        glRotatef(-25.0f, 1.0f, 0.0f, 0.0f);       
-
-        glTranslatef(0.0f, 0.12f, 0.0f);
-
-        glutSolidCone(0.035, 0.22, 8, 8);
+        glTranslatef(0.0f, 0.20f, 0.0f);       
+        glRotatef(180.0f, 1.0f, 0.0f, 0.0f);   
+        glutSolidCone(0.12, 0.4, 12, 12);
         glPopMatrix();
+
+        //Folhas
+        float corFolha[] = { 0.0f, 0.28f, 0.23f, 1.0f };
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corFolha);
+
+        for (int i = 0; i < 3; i++) {
+            glPushMatrix();
+            glTranslatef(0.0f, 0.40f, 0.0f);
+            glRotatef(i * 120.0f, 0.0f, 1.0f, 0.0f);
+            glRotatef(-25.0f, 1.0f, 0.0f, 0.0f);
+            glTranslatef(0.0f, 0.12f, 0.0f);
+            glutSolidCone(0.035, 0.22, 8, 8);
+            glPopMatrix();
+        }
     }
-}
 
     void desenhaAlmeirao3D() {
         float corFolha[] = { 0.70f, 0.98f, 0.58f, 1.0f };
@@ -435,65 +451,65 @@ void desenhaCenoura3D() {
         }
     }
 
-void desenhaCilindroVertical(float altura, float raioBase, float raioTopo,
-                             float r, float g, float b) {
-    float cor[] = { r, g, b, 1.0f };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, cor);
-    glPushMatrix();
-    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-    GLUquadric* q = gluNewQuadric();
-    gluCylinder(q, raioBase, raioTopo, altura, 10, 1);
-    gluDeleteQuadric(q);
-    glPopMatrix();
-}
+    void desenhaCilindroVertical(float altura, float raioBase, float raioTopo,
+                                 float r, float g, float b) {
+        float cor[] = { r, g, b, 1.0f };
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, cor);
+        glPushMatrix();
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        GLUquadric* q = gluNewQuadric();
+        gluCylinder(q, raioBase, raioTopo, altura, 10, 1);
+        gluDeleteQuadric(q);
+        glPopMatrix();
+    }
 
-void desenhaCouve3D() {
-    float corVerdeClaro[]  = { 0.70f, 0.98f, 0.58f, 1.0f };
-    float corVerdeEscuro[] = { 0.00f, 0.28f, 0.23f, 1.0f };
+    void desenhaCouve3D() {
+        float corVerdeClaro[]  = { 0.70f, 0.98f, 0.58f, 1.0f };
+        float corVerdeEscuro[] = { 0.00f, 0.28f, 0.23f, 1.0f };
 
-    //Folha
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corVerdeEscuro);
-    glPushMatrix();
-    glTranslatef(0.0f, 0.30f, 0.0f);
-    glScalef(0.75f, 1.0f, 0.10f);
-    glutSolidSphere(0.28, 16, 16);
-    glPopMatrix();
+        //Folha
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corVerdeEscuro);
+        glPushMatrix();
+        glTranslatef(0.0f, 0.30f, 0.0f);
+        glScalef(0.75f, 1.0f, 0.10f);
+        glutSolidSphere(0.28, 16, 16);
+        glPopMatrix();
 
-    //Caule + nervuras
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.0f);
-    desenhaCilindroVertical(0.55f, 0.035f, 0.008f,
-                            corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
-    glPopMatrix();
+        //Caule + nervuras
+        glPushMatrix();
+        glTranslatef(0.0f, 0.0f, 0.0f);
+        desenhaCilindroVertical(0.55f, 0.035f, 0.008f,
+                                corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
+        glPopMatrix();
 
-    // Linhas laterais
-    float comprimento  = 0.12f;
-    float raioNervura  = 0.008f;
-    float zFrente      = 0.045f;
-    float zTras        = -0.045f;
+        // Linhas laterais
+        float comprimento  = 0.12f;
+        float raioNervura  = 0.008f;
+        float zFrente      = 0.045f;
+        float zTras        = -0.045f;
 
-    float angulo = 40.0f;
+        float angulo = 40.0f;
 
-    float ySaida[3] = { 0.18f, 0.28f, 0.38f };
+        float ySaida[3] = { 0.18f, 0.28f, 0.38f };
 
-    for (int lado = -1; lado <= 1; lado += 2) {   // esquerda e direita
-        for (int face = 0; face < 2; face++) {    // frente e trás
-            float zFace = (face == 0) ? zFrente : zTras;
+        for (int lado = -1; lado <= 1; lado += 2) {   // esquerda e direita
+            for (int face = 0; face < 2; face++) {    // frente e trás
+                float zFace = (face == 0) ? zFrente : zTras;
 
-            for (int i = 0; i < 3; i++) {
-                glPushMatrix();
-                glTranslatef(0.0f, ySaida[i], zFace);
+                for (int i = 0; i < 3; i++) {
+                    glPushMatrix();
+                    glTranslatef(0.0f, ySaida[i], zFace);
 
-                glRotatef(lado * angulo, 0.0f, 0.0f, 1.0f);
-                glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+                    glRotatef(lado * angulo, 0.0f, 0.0f, 1.0f);
+                    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
 
-                desenhaCilindroVertical(comprimento, raioNervura, raioNervura,
-                                        corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
-                glPopMatrix();
+                    desenhaCilindroVertical(comprimento, raioNervura, raioNervura,
+                                            corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
+                    glPopMatrix();
+                }
             }
         }
     }
-}
 
     void desenhaVegetal(Vegetal v) {
         glPushMatrix();
@@ -515,26 +531,59 @@ void desenhaCouve3D() {
     }
     
     void inicializaVegetais() {
-    for (int i = 0; i < NUM_VEGETAIS; i++) {
-        vegetais[i].x = (rand() % 40) - 20.0f;    // -20 a +20
-        vegetais[i].z = (rand() % 40) - 20.0f;
-        vegetais[i].tipo = (rand() % 3) + 1;
-        vegetais[i].bloco = 0;
-        vegetais[i].ativo = true;
-    }
-}
-
-void atualizaVegetais() {
-    // Recicla vegetais que ficaram para trás do coelho
-    for (int i = 0; i < NUM_VEGETAIS; i++) {
-        if (vegetais[i].ativo && vegetais[i].x < personagemPosX - 30.0f) {
-            vegetais[i].x = personagemPosX + 30.0f + (rand() % 20);
+        for (int i = 0; i < NUM_VEGETAIS; i++) {
+            vegetais[i].x = (rand() % 40) - 20.0f;    // -20 a +20
             vegetais[i].z = (rand() % 40) - 20.0f;
             vegetais[i].tipo = (rand() % 3) + 1;
+            vegetais[i].bloco = 0;
             vegetais[i].ativo = true;
         }
     }
-}
+
+    void atualizaVegetais() {
+        // Recicla vegetais que ficaram para trás do coelho
+        for (int i = 0; i < NUM_VEGETAIS; i++) {
+            if (vegetais[i].ativo && vegetais[i].x < personagemPosX - 30.0f) {
+                vegetais[i].x = personagemPosX + 30.0f + (rand() % 20);
+                vegetais[i].z = (rand() % 40) - 20.0f;
+                vegetais[i].tipo = (rand() % 3) + 1;
+                vegetais[i].ativo = true;
+            }
+        }
+    }
+
+    void colisaoVegetal() {
+        float coelhoX = personagemPosX;
+        float coelhoZ = personagemPosZ;
+        float raioColeta = 0.6f;   
+
+        for (int i = 0; i < NUM_VEGETAIS; i++) {
+            if (!vegetais[i].ativo) continue;
+
+            float dx = coelhoX - vegetais[i].x;
+            float dz = coelhoZ - vegetais[i].z;
+            float distancia = sqrtf(dx*dx + dz*dz);
+
+            if (distancia < raioColeta) {
+                vegetais[i].ativo = false;
+
+                switch (vegetais[i].tipo) {
+                    case 1: 
+                        pontos++;
+                        vidas++;
+                        break;
+                    case 2: 
+                        pontos += 10;
+                        break;
+                    case 3: 
+                        pontos++;
+                        imune = true;
+                        tempoImune = 180;
+                        break;
+                }
+            }
+        }
+    }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
