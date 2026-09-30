@@ -171,7 +171,7 @@ void cameraVisaoGeral() {
 
     float camX = cameraRaio * sin(rad);
     float camZ = cameraRaio * cos(rad);
-    float camY = 15.0;
+    float camY = 10.0;
 
     gluLookAt(
         camX, camY, camZ, // posição camera
@@ -243,7 +243,7 @@ void desenhaCoelho() {
     
     glPushMatrix();                                        
     glTranslatef(personagemPosX, personagemBaseY, personagemPosZ);  
-    glRotatef(personagemAngulo, 0.0, 1.0, 0.0);
+    glRotatef(-personagemAngulo, 0.0, 1.0, 0.0);
     
    //Corpo
     glPushMatrix();
@@ -365,6 +365,7 @@ void desenhaPersonagem() {
     glPushMatrix();
     glTranslatef(personagemPosX, personagemBaseY, personagemPosZ);
     glRotatef(personagemAngulo, 0.0, 1.0, 0.0);
+    glRotatef(180.0, 0.0, 1.0, 0.0);
     desenhaCoelho();
     glPopMatrix();
 }
