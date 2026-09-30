@@ -58,6 +58,82 @@ char* textureFileNames[2] = {
     "texturas/marble.jpg"
 };
 
+//TEXTOS
+//TEXTO
+
+void textoGameOver(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "GAME OVER! Suas vidas acabaram :( Aperte 'R' para reiniciar.";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoPausa(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "JOGO PAUSADO";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoVidas(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[10];
+    sprintf(texto, "Vidas: %d", vidas);
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoPontos(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[10];
+    sprintf(texto, "Pontos: %d", pontos);
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoImune(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "IMUNIDADE ATIVADA!";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void desenhaTextos() {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 100, 0, 100);   // 0-100 em X e Y, canto = sempre canto
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+
+    glColor3f(0.0f, 0.0f, 0.0f);
+    textoVidas(2.0f, 95.0f);
+    textoPontos(2.0f, 90.0f);
+    if (imune) {
+        glColor3f(0.0f, 0.5f, 0.0f);
+        textoImune(2.0f, 85.0f);
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
 
 void initGL() {
     glClearColor(0.62f, 0.85f, 0.90f, 1.0f); // background color
@@ -602,6 +678,8 @@ void display() {
     desenhaCoelho();
     /*desenhaPersonagem();*/
 
+    desenhaTextos();
+
     glutSwapBuffers();
 }
 
@@ -637,3 +715,7 @@ int main(int argc, char** argv) {
     glutMainLoop();
     return 0;
 }
+
+
+
+
