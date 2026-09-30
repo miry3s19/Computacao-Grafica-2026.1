@@ -1,8 +1,19 @@
 # Relatório Trabalho 02
 
+## Índice
+
+- [Contextualização](#contextualização-do-trabalho)
+- [Visão Geral](#visão-geral)
+- [Questão 01](#questão-01---modelagem-tridimensional)
+- [Questão 02](#questão-02---texturas)
+- [Questão 03](#questão-03---movimentação-do-personagem)
+- [Questão 04](#questão-04---alternância-da-câmera)
+- [Questão 05](#questão-05---rotação-da-câmera)
+- [Questão 06](#questão-06---iluminação)
+
 ## Anotações úteis
 
-Use para inserir um bloco de código: 
+Use para inserir um bloco de código:
 ```cpp
 
 ```
@@ -29,10 +40,7 @@ realizadas as adaptações necessárias para a representação e interação em 
 
 ## Visão Geral
 
-
-
 ### main
-
 ```cpp
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
@@ -54,14 +62,10 @@ int main(int argc, char** argv) {
     return 0;
 }
 ```
+
 ### funções auxiliares
 
 #### init
-
-```cpp
-
-```
-
 
 #### display
 
@@ -88,7 +92,62 @@ A bola está com textura, então talvez seja preciso alterar isso pra cor lisa.
 
 Tentativa de um cenário infinito, com um chão que aparece a medida que o personagem se move.
 
-### Questão 02 - Texturas (feito para o cenário)
+```cpp
+float chaoDeslocX = 0.0f;
+float chaoDeslocZ = 0.0f;
+float chaoCelula = 2.0f;
+int chaoNumCelulas = 20;
+```
+
+```cpp
+void desenhaChao() {
+    glPushMatrix();
+
+    chaoDeslocX = floor(personagemPosX / chaoCelula) * chaoCelula;
+    chaoDeslocZ = floor(personagemPosZ / chaoCelula) * chaoCelula;
+    glTranslatef(chaoDeslocX, 0.0f, chaoDeslocZ);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texID[0]);
+
+    for (int i = -chaoNumCelulas; i < chaoNumCelulas; i++) {
+        for (int j = -chaoNumCelulas; j < chaoNumCelulas; j++) {
+            float x1 = i * chaoCelula;
+            float z1 = j * chaoCelula;
+            float x2 = (i + 1) * chaoCelula;
+            float z2 = (j + 1) * chaoCelula;
+
+            glBegin(GL_QUADS);
+                glNormal3f(0.0, 1.0, 0.0);
+                glTexCoord2f(0.0, 0.0);
+                glVertex3f(x1, 0.0f, z1);
+                glTexCoord2f(1.0, 0.0);
+                glVertex3f(x2, 0.0f, z1);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3f(x2, 0.0f, z2);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3f(x1, 0.0f, z2);
+            glEnd();
+        }
+    }
+
+    glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
+}
+```
+
+*O que o código faz?*
+
+1 - Empilha a matriz de tranformação atual, desconsiderando qualquer transformação anterior.
+2 - Calcula o deslocamento do chão:
+
+```cpp
+chaoDeslocX = floor(personagemPosX / chaoCelula) * chaoCelula;
+chaoDeslocZ = floor(personagemPosZ / chaoCelula) * chaoCelula;
+```
+Onde personagemPosX é a posição atual do personagem no eixo x, personagemPosZ é a posição atual do personagem no eixoZ, chaoCelula é o tamanho de cada bloco do chão.
+
+### Questão 02 - Texturas
 
 #### Instruções
 Insira texturas na cena, buscando proporcionar um maior grau de detalhamento e realismo aos elementos do
@@ -107,7 +166,7 @@ Texturas:
 
 - uma textura de grama para o chão
 
-### Questão 03 - Movimentação do personagem (feito)
+### Questão 03 - Movimentação do personagem
 
 Permita que o personagem principal seja controlado por meio das setas do teclado, de acordo com as seguintes
 regras:
@@ -117,7 +176,37 @@ regras:
 - Seta para direita: rotaciona o personagem em torno do seu próprio eixo.
 O deslocamento para frente e para trás deve respeitar a direção para a qual o personagem está orientado.
 
-### Questão 04 - Alternância da câmera (feito)
+#### Implementação
+
+```cpp
+void specialKeyFunction(int key, int x, int y) {
+    float velocidade = 0.2;
+    float velocidadeRotacao = 5.0;
+    float rad = personagemAngulo * M_PI / 180.0;
+
+    switch (key) {
+        case GLUT_KEY_UP:
+            personagemPosX += velocidade * sin(rad);
+            personagemPosZ -= velocidade * cos(rad);
+            break;
+        case GLUT_KEY_DOWN:
+            personagemPosX -= velocidade * sin(rad);
+            personagemPosZ += velocidade * cos(rad);
+            break;
+        case GLUT_KEY_LEFT:
+            personagemAngulo -= velocidadeRotacao;
+            break;
+        case GLUT_KEY_RIGHT:
+            personagemAngulo += velocidadeRotacao;
+            break;
+    }
+    glutPostRedisplay();
+}
+```
+
+*O que o código faz?*
+
+### Questão 04 - Alternância da câmera
 
 #### Instruções
 
@@ -125,8 +214,8 @@ Permita que, ao pressionar a tecla “c”, a visualização da cena seja altern
 - uma visão geral da cena, posicionada, por exemplo, no ponto (0, 10, 10); e
 - uma visão em primeira pessoa, posicionada de acordo com a orientação e a posição do personagem principal.
 
-#### Implementação 
- 
+#### Implementação
+
  Para alterar a câmera, foi utilzada uma função "keyboardChangeCamera" que é passada como parâmetro de "glutKeyboardFunc".
  Dentro da função foram adicionados dois casos:
 
@@ -177,8 +266,7 @@ void cameraPrimeiraPessoa() {
 }
 ```
 
-
-### Questão 05 - Rotação da câmera (feito)
+### Questão 05 - Rotação da câmera
 
 #### Instruções
 
@@ -188,9 +276,23 @@ rotacionada em relação ao eixo Y, possibilitando observar a cena a partir de d
 #### Implementação
 
 ```cpp
+void cameraPrimeiraPessoa() {
+    float rad = personagemAngulo * M_PI / 180.0;
 
+    float cameraX = personagemPosX - camDistancia * sin(rad);
+    float cameraZ = personagemPosZ + camDistancia * cos(rad);
+    float cameraY = camAltura;
 
+    float alvoX = personagemPosX + 5.0 * sin(rad);
+    float alvoZ = personagemPosZ - 5.0 * cos(rad);
+    float alvoY = personagemRaio;
 
+    gluLookAt(
+        cameraX, cameraY, cameraZ,
+        alvoX, alvoY, alvoZ,
+        0.0, 1.0, 0.0
+    );
+}
 ```
 
 ### Questão 06 - Iluminação
