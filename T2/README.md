@@ -66,8 +66,44 @@ int main(int argc, char** argv) {
 ### funções auxiliares
 
 #### init
+```cpp
+void init() {
+    glClearColor(0.62f, 0.85f, 0.90f, 1.0f); // background color
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
+    float luz1Difusa[]  = { 0.3f, 0.4f, 0.5f, 1.0f };
+    float luz1Posicao[] = { -8.0f, 6.0f, -5.0f, 1.0f };
+    glLightfv(GL_LIGHT1, GL_DIFFUSE,  luz1Difusa);
+    glLightfv(GL_LIGHT1, GL_POSITION, luz1Posicao);
+
+    // Material branco para texturas
+    float white[4] = { 1, 1, 1, 1 };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+
+    // Configuração da luz
+    float luzAmbiente[] = {0.3f, 0.3f, 0.3f, 1.0f};
+    float luzDifusa[]  = {0.7f, 0.7f, 0.7f, 1.0f};
+    float luzPosicao[] = {0.0f, 10.0f, 0.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
+    glLightfv(GL_LIGHT0, GL_POSITION, luzPosicao);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60, 1.0, 0.1, 1000.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+```
 
 #### display
+
+```cpp
+
+```
 
 ## Questões Propostas
 
@@ -92,12 +128,21 @@ A bola está com textura, então talvez seja preciso alterar isso pra cor lisa.
 
 Tentativa de um cenário infinito, com um chão que aparece a medida que o personagem se move.
 
+###### Variáveis de controle
+
 ```cpp
 float chaoDeslocX = 0.0f;
 float chaoDeslocZ = 0.0f;
 float chaoCelula = 2.0f;
 int chaoNumCelulas = 20;
 ```
+
+- chaoDeslocX: desloca a grade (grid) no eixo x.
+- chaoDeslocZ: desloca a grade no eixo z.
+- chaoCelula: tamanho de cada celula (tile) do chão, nesse caso, cada celula tem um tamanho 2x2.
+- chaoNumCelulas: quantidade de celulas em cada direção, nesse caso, forma um quadrado com 20x20 celulas.
+
+###### função principal
 
 ```cpp
 void desenhaChao() {
@@ -138,14 +183,62 @@ void desenhaChao() {
 
 *O que o código faz?*
 
-1 - Empilha a matriz de tranformação atual, desconsiderando qualquer transformação anterior.
-2 - Calcula o deslocamento do chão:
+- Empilha a matriz de tranformação atual, desconsiderando qualquer transformação anterior.
+
+```cpp
+glPushMatrix();
+```
+
+- Calcula o deslocamento da grade baseado na posição atual do personagem:
 
 ```cpp
 chaoDeslocX = floor(personagemPosX / chaoCelula) * chaoCelula;
 chaoDeslocZ = floor(personagemPosZ / chaoCelula) * chaoCelula;
 ```
-Onde personagemPosX é a posição atual do personagem no eixo x, personagemPosZ é a posição atual do personagem no eixoZ, chaoCelula é o tamanho de cada bloco do chão.
+
+A posição do personagem é dividida pelo tamanho da célula, obtém o inteiro mais próximo utilizando a função de arredondamento floor() e multiplica novamente pelo tamanho da célula. Esse processo é feito para os eixos X e Y e permite que a grade sempre fique alinhada com a posição atual do personagem.
+
+- Translada a grade para a posição calculada
+
+```cpp
+glTranslatef(chaoDeslocX, 0.0f, chaoDeslocZ);
+```
+Move a grade para que ela esteja centrada na posição atual do personagem.
+
+- Habilita e aplica a textura do chão
+
+- Desenha a grade de quadrados
+
+``` cpp
+for (int i = -chaoNumCelulas; i < chaoNumCelulas; i++) {
+        for (int j = -chaoNumCelulas; j < chaoNumCelulas; j++) {
+            float x1 = i * chaoCelula;
+            float z1 = j * chaoCelula;
+            float x2 = (i + 1) * chaoCelula;
+            float z2 = (j + 1) * chaoCelula;
+            
+            glBegin(GL_QUADS);
+                glNormal3f(0.0, 1.0, 0.0);
+                glTexCoord2f(0.0, 0.0);
+                glVertex3f(x1, 0.0f, z1);
+                glTexCoord2f(1.0, 0.0);
+                glVertex3f(x2, 0.0f, z1);
+                glTexCoord2f(1.0, 1.0);
+                glVertex3f(x2, 0.0f, z2);
+                glTexCoord2f(0.0, 1.0);
+                glVertex3f(x1, 0.0f, z2);
+            glEnd();
+        }
+    }
+```
+São desenhadas 20x20 células, onde cada uma é um quadrado no plano Y=0. Para aplicar a textura, utilizam-se as coordenadas (0,0) e (1,1) para que exibam a textura completa. A normal (0,1,0) indica que a superfície aponta pra cima para aplicação da iluminação.
+
+- Desabilita a textura e restaura a matriz de transformação
+
+``` cpp
+glDisable(GL_TEXTURE_2D);
+glPopMatrix();
+```
 
 ### Questão 02 - Texturas
 
@@ -161,6 +254,43 @@ As texturas devem ser utilizadas, no mínimo, nos seguintes elementos:
 A escolha das imagens utilizadas como texturas é livre, desde que sejam adequadas à proposta do jogo.
 
 #### Implementação
+
+```cpp
+GLuint texID[2]; // 0 = chão, 1 = personagem
+char* textureFileNames[2] = {
+    "texturas/grass.jpg",
+    "texturas/marble.jpg"
+};
+```
+```cpp
+void loadTextures() {
+    int width, height, nrChannels;
+    unsigned char *data;
+
+    glGenTextures(2, texID);
+
+    for (int i = 0; i < 2; i++) {
+        glBindTexture(GL_TEXTURE_2D, texID[i]);
+
+        // set the texture wrapping/filtering options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // load and generate the texture
+        data = stbi_load(textureFileNames[i], &width, &height, &nrChannels, 0);
+
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+        } else {
+            printf("Failed to load texture: %s\n", textureFileNames[i]);
+        }
+        stbi_image_free(data);
+    }
+}
+```
 
 Texturas:
 
@@ -276,23 +406,38 @@ rotacionada em relação ao eixo Y, possibilitando observar a cena a partir de d
 #### Implementação
 
 ```cpp
-void cameraPrimeiraPessoa() {
-    float rad = personagemAngulo * M_PI / 180.0;
+void keyboardChangeCamera(unsigned char key, int x, int y) {
+    switch (key) {
+        case 27: // ESC
+            exit(0);
+            break;
+        case 'r':
+            cameraRoacaoY += 15.0;
+            break;
+        case 'c':
+            modoCamera = (modoCamera + 1) % 2;
+            break;
+    }
+    glutPostRedisplay();
+}
+```
 
-    float cameraX = personagemPosX - camDistancia * sin(rad);
-    float cameraZ = personagemPosZ + camDistancia * cos(rad);
-    float cameraY = camAltura;
+```cpp
+void cameraVisaoGeral() {
 
-    float alvoX = personagemPosX + 5.0 * sin(rad);
-    float alvoZ = personagemPosZ - 5.0 * cos(rad);
-    float alvoY = personagemRaio;
+    float rad = cameraRoacaoY * M_PI / 180;
+
+    float camX = cameraRaio * sin(rad);
+    float camZ = cameraRaio * cos(rad);
+    float camY = 15.0;
 
     gluLookAt(
-        cameraX, cameraY, cameraZ,
-        alvoX, alvoY, alvoZ,
-        0.0, 1.0, 0.0
+        camX, camY, camZ, // posição camera
+        0.0, 0.0, 0.0,   // mira
+        0.0, 1.0, 0.0    // pra cima
     );
 }
+
 ```
 
 ### Questão 06 - Iluminação
