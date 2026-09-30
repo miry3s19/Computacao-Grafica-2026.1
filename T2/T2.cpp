@@ -1,4 +1,5 @@
 #include <GL/glut.h>
+#include <GL/glext.h>
 #include <stdio.h>
 #include <math.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -11,11 +12,28 @@ float personagemPosX = 0.0f;
 float personagemPosZ = 0.0f;
 float personagemRaio = 0.5f;
 float personagemAngulo = 0.0f;
+float personagemBaseY = 0.0f;
+
+float deslocamentoPata = 0.0f; 
+
+// Elementos de bonificação
+typedef struct {
+    float x;
+    float z;
+    int tipo;       // 1 = almeirão, 2 = cenoura, 3 = couve
+    int bloco;
+    bool ativo;
+} Vegetal;
+
+#define NUM_VEGETAIS 16
+Vegetal vegetais[NUM_VEGETAIS];
+
+float offsetX = 0.0f;
 
 // Câmera
 int modoCamera = 0; // 0 = visão geral, 1 = primeira pessoa
-float camDistancia = 10.0f;
-float camAltura = 2.0f;
+float camDistancia = 2.0f;
+float camAltura = 1.0f;
 
 // Rotação da Câmera
 float cameraRoacaoY = 0.0;
@@ -41,6 +59,11 @@ void initGL() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
+    float luz1Difusa[]  = { 0.3f, 0.4f, 0.5f, 1.0f };
+    float luz1Posicao[] = { -8.0f, 6.0f, -5.0f, 1.0f };
+    glLightfv(GL_LIGHT1, GL_DIFFUSE,  luz1Difusa);
+    glLightfv(GL_LIGHT1, GL_POSITION, luz1Posicao);
 
     // Material branco para texturas
     float white[4] = { 1, 1, 1, 1 };
@@ -123,10 +146,10 @@ void specialKeyFunction(int key, int x, int y) {
             personagemPosZ += velocidade * cos(rad);
             break;
         case GLUT_KEY_LEFT:
-            personagemAngulo += velocidadeRotacao;
+            personagemAngulo -= velocidadeRotacao;
             break;
         case GLUT_KEY_RIGHT:
-            personagemAngulo -= velocidadeRotacao;
+            personagemAngulo += velocidadeRotacao;
             break;
     }
     glutPostRedisplay();
@@ -158,7 +181,7 @@ void cameraPrimeiraPessoa() {
 
     float alvoX = personagemPosX + 5.0 * sin(rad);
     float alvoZ = personagemPosZ - 5.0 * cos(rad);
-    float alvoY = personagemRaio;
+    float alvoY = camAltura;
 
     gluLookAt(
         cameraX, cameraY, cameraZ,
@@ -206,7 +229,139 @@ void desenhaChao() {
 
 //Personagens
 
+void desenhaCoelho() {
+    float corPelo[] = { 0.93f, 0.87f, 0.75f, 1.0f };  // bege claro
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    
+    glPushMatrix();                                        
+    glTranslatef(personagemPosX, personagemBaseY, personagemPosZ);  
+    glRotatef(personagemAngulo, 0.0, 1.0, 0.0);
+    
+   //Corpo
+    glPushMatrix();
+    glTranslatef(0.0f, 0.55f, 0.0f);          
+    glScalef(1.0f, 0.85f, 1.3f);             
+    glutSolidSphere(0.4, 20, 20);             
+    glPopMatrix();
+
+    //Cabeça 
+    glPushMatrix();
+    glTranslatef(0.0f, 0.92f, -0.42f);
+    glScalef(1.0f, 0.95f, 1.15f);           
+    glutSolidSphere(0.26, 20, 20);
+    glPopMatrix();
+
+    //Focinho 
+    glPushMatrix();
+    glTranslatef(0.0f, 0.86f, -0.66f);
+    glScalef(1.1f, 0.85f, 1.0f);
+    glutSolidSphere(0.075, 12, 12);
+    glPopMatrix();
+
+    //Nariz 
+    glPushMatrix();
+    glTranslatef(0.0f, 0.90f, -0.72f);
+    glutSolidSphere(0.022, 8, 8);
+    glPopMatrix();
+
+    //Dentes 
+    glPushMatrix();
+    glTranslatef(-0.028f, 0.79f, -0.70f);
+    glScalef(0.045f, 0.06f, 0.03f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.028f, 0.79f, -0.70f);
+    glScalef(0.045f, 0.06f, 0.03f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+    
+    //Orelhas
+    glPushMatrix();
+    glTranslatef(-0.12f, 1.28f, -0.42f);
+    glRotatef(-12.0f, 0.0f, 0.0f, 1.0f);     
+    glRotatef(-10.0f, 1.0f, 0.0f, 0.0f);     
+    glScalef(0.08f, 0.42f, 0.08f);            
+    glutSolidSphere(1.0, 12, 12);
+    glPopMatrix();
+
+    
+    glPushMatrix();
+    glTranslatef(0.12f, 1.28f, -0.42f);
+    glRotatef(12.0f, 0.0f, 0.0f, 1.0f);
+    glRotatef(-10.0f, 1.0f, 0.0f, 0.0f);
+    glScalef(0.08f, 0.42f, 0.08f);
+    glutSolidSphere(1.0, 12, 12);
+    glPopMatrix();
+    
+   
+
+    //Olhos
+    float corOlho[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corOlho);
+
+    glPushMatrix();
+    glTranslatef(-0.10f, 0.98f, -0.70f);
+    glScalef(1.0f, 1.1f, 0.5f);
+    glutSolidSphere(0.028, 12, 12);    // <-- era 0.05
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.10f, 0.98f, -0.70f);
+    glScalef(1.0f, 1.1f, 0.5f);
+    glutSolidSphere(0.028, 12, 12);
+    glPopMatrix();
+
+    //Patas
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    
+   //Pata dianteira esquerda
+    glPushMatrix();
+    glTranslatef(-0.18f, 0.18f + deslocamentoPata, -0.22f);
+    glScalef(0.10f, 0.36f, 0.10f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Pata dianteira direita
+    glPushMatrix();
+    glTranslatef(0.18f, 0.18f - deslocamentoPata, -0.22f);
+    glScalef(0.10f, 0.36f, 0.10f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Pata traseira esquerda
+    glPushMatrix();
+    glTranslatef(-0.18f, 0.18f - deslocamentoPata, 0.25f);
+    glScalef(0.12f, 0.36f, 0.12f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Pata traseira direita
+    glPushMatrix();
+    glTranslatef(0.18f, 0.18f + deslocamentoPata, 0.25f);
+    glScalef(0.12f, 0.36f, 0.12f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Rabo
+    glPushMatrix();
+    glTranslatef(0.0f, 0.60f, 0.55f);
+    glutSolidSphere(0.10, 10, 10);
+    glPopMatrix();
+    
+    glPopMatrix();
+}
+
 void desenhaPersonagem() {
+    glPushMatrix();
+    glTranslatef(personagemPosX, personagemBaseY, personagemPosZ);
+    glRotatef(personagemAngulo, 0.0, 1.0, 0.0);
+    desenhaCoelho();
+    glPopMatrix();
+}
+
+/*void desenhaPersonagem() {
     glPushMatrix();
 
     glTranslatef(personagemPosX, personagemRaio, personagemPosZ);
@@ -223,6 +378,162 @@ void desenhaPersonagem() {
 
     glDisable(GL_TEXTURE_2D);
     glPopMatrix();
+}*/
+
+
+    //Elementos de bonificação
+
+void desenhaCenoura3D() {
+    //Raiz
+    float corRaiz[] = { 0.97f, 0.60f, 0.09f, 1.0f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corRaiz);
+
+    glPushMatrix();
+    glTranslatef(0.0f, 0.20f, 0.0f);
+    glRotatef(180.0f, 1.0f, 0.0f, 0.0f);   // ponta para baixo
+    glutSolidCone(0.12, 0.4, 12, 12);
+    glPopMatrix();
+
+    // Folhas
+    float corFolha[] = { 0.0f, 0.28f, 0.23f, 1.0f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corFolha);
+    for (int i = 0; i < 3; i++) {
+        glPushMatrix();
+        glTranslatef(0.0f, 0.40f, 0.0f);           
+        glRotatef(i * 120.0f, 0.0f, 1.0f, 0.0f);   
+        glRotatef(-25.0f, 1.0f, 0.0f, 0.0f);       
+
+        glTranslatef(0.0f, 0.12f, 0.0f);
+
+        glutSolidCone(0.035, 0.22, 8, 8);
+        glPopMatrix();
+    }
+}
+
+    void desenhaAlmeirao3D() {
+        float corFolha[] = { 0.70f, 0.98f, 0.58f, 1.0f };
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corFolha);
+
+        // Caule 
+        glPushMatrix();
+        glTranslatef(0.0f, 0.2f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        GLUquadric* q = gluNewQuadric();
+        gluCylinder(q, 0.02, 0.02, 0.4, 8, 1);
+        gluDeleteQuadric(q);
+        glPopMatrix();
+
+        // Folhas 
+        for (int i = 0; i < 3; i++) {
+            glPushMatrix();
+            glTranslatef(0.0f, 0.4f + i * 0.08f, 0.0f);
+            glRotatef(i * 120.0f, 0.0f, 1.0f, 0.0f);
+            glTranslatef(0.12f, 0.0f, 0.0f);
+            glScalef(1.4f, 0.25f, 0.7f);
+            glutSolidSphere(0.12, 10, 10);
+            glPopMatrix();
+        }
+    }
+
+void desenhaCilindroVertical(float altura, float raioBase, float raioTopo,
+                             float r, float g, float b) {
+    float cor[] = { r, g, b, 1.0f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, cor);
+    glPushMatrix();
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    GLUquadric* q = gluNewQuadric();
+    gluCylinder(q, raioBase, raioTopo, altura, 10, 1);
+    gluDeleteQuadric(q);
+    glPopMatrix();
+}
+
+void desenhaCouve3D() {
+    float corVerdeClaro[]  = { 0.70f, 0.98f, 0.58f, 1.0f };
+    float corVerdeEscuro[] = { 0.00f, 0.28f, 0.23f, 1.0f };
+
+    //Folha
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corVerdeEscuro);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.30f, 0.0f);
+    glScalef(0.75f, 1.0f, 0.10f);
+    glutSolidSphere(0.28, 16, 16);
+    glPopMatrix();
+
+    //Caule + nervuras
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.0f);
+    desenhaCilindroVertical(0.55f, 0.035f, 0.008f,
+                            corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
+    glPopMatrix();
+
+    // Linhas laterais
+    float comprimento  = 0.12f;
+    float raioNervura  = 0.008f;
+    float zFrente      = 0.045f;
+    float zTras        = -0.045f;
+
+    float angulo = 40.0f;
+
+    float ySaida[3] = { 0.18f, 0.28f, 0.38f };
+
+    for (int lado = -1; lado <= 1; lado += 2) {   // esquerda e direita
+        for (int face = 0; face < 2; face++) {    // frente e trás
+            float zFace = (face == 0) ? zFrente : zTras;
+
+            for (int i = 0; i < 3; i++) {
+                glPushMatrix();
+                glTranslatef(0.0f, ySaida[i], zFace);
+
+                glRotatef(lado * angulo, 0.0f, 0.0f, 1.0f);
+                glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+
+                desenhaCilindroVertical(comprimento, raioNervura, raioNervura,
+                                        corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
+                glPopMatrix();
+            }
+        }
+    }
+}
+
+    void desenhaVegetal(Vegetal v) {
+        glPushMatrix();
+        glTranslatef(v.x, 0.0f, v.z);
+        switch (v.tipo) {
+            case 1: desenhaAlmeirao3D(); break;
+            case 2: desenhaCenoura3D();  break;
+            case 3: desenhaCouve3D();    break;
+        }
+        glPopMatrix();
+    }
+
+    void desenhaVegetais() {
+        for (int i = 0; i < NUM_VEGETAIS; i++) {
+            if (vegetais[i].ativo) {
+                desenhaVegetal(vegetais[i]);
+            }
+        }
+    }
+    
+    void inicializaVegetais() {
+    for (int i = 0; i < NUM_VEGETAIS; i++) {
+        vegetais[i].x = (rand() % 40) - 20.0f;    // -20 a +20
+        vegetais[i].z = (rand() % 40) - 20.0f;
+        vegetais[i].tipo = (rand() % 3) + 1;
+        vegetais[i].bloco = 0;
+        vegetais[i].ativo = true;
+    }
+}
+
+void atualizaVegetais() {
+    // Recicla vegetais que ficaram para trás do coelho
+    for (int i = 0; i < NUM_VEGETAIS; i++) {
+        if (vegetais[i].ativo && vegetais[i].x < personagemPosX - 30.0f) {
+            vegetais[i].x = personagemPosX + 30.0f + (rand() % 20);
+            vegetais[i].z = (rand() % 40) - 20.0f;
+            vegetais[i].tipo = (rand() % 3) + 1;
+            vegetais[i].ativo = true;
+        }
+    }
 }
 
 void display() {
@@ -237,9 +548,11 @@ void display() {
             cameraPrimeiraPessoa();
             break;
     }
-
+    atualizaVegetais();
     desenhaChao();
-    desenhaPersonagem();
+    desenhaVegetais();
+    desenhaCoelho();
+    /*desenhaPersonagem();*/
 
     glutSwapBuffers();
 }
@@ -263,12 +576,15 @@ int main(int argc, char** argv) {
 
     initGL();
     loadTextures();
+    inicializaVegetais();
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboardChangeCamera);
     glutSpecialFunc(specialKeyFunction);
     glutIdleFunc(display);
+    
+    
 
     glutMainLoop();
     return 0;

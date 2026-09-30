@@ -2,7 +2,7 @@
 
 echo "Compilando o projeto OpenGL..."
 
-g++ T2.cpp -o corre_coelho.exe -lfreeglut -lopengl32 -lglu32 -lm
+g++ T2.cpp -o corre_coelho.exe -lfreeglut -lopengl32 -lglu32 -lm -DGL_GLEXT_PROTOTYPES -Wno-write-strings
 
 if [ $? -eq 0 ]; then
     echo ""
