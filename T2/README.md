@@ -4,12 +4,12 @@
 
 - [Contextualização](#contextualização-do-trabalho)
 - [Visão Geral](#visão-geral)
-- [Questão 01](#questão-01---modelagem-tridimensional)
-- [Questão 02](#questão-02---texturas)
-- [Questão 03](#questão-03---movimentação-do-personagem)
-- [Questão 04](#questão-04---alternância-da-câmera)
-- [Questão 05](#questão-05---rotação-da-câmera)
-- [Questão 06](#questão-06---iluminação)
+- [Questão 01 - Modelagem tridimensional](#questão-01---modelagem-tridimensional)
+- [Questão 02 - Texturas](#questão-02---texturas)
+- [Questão 03 - Movimentação do personagem](#questão-03---movimentação-do-personagem)
+- [Questão 04 - Alternância da Câmera](#questão-04---alternância-da-câmera)
+- [Questão 05 - Rotação da Câmera](#questão-05---rotação-da-câmera)
+- [Questão 06 - Iluminação](#questão-06---iluminação)
 
 ## Anotações úteis
 
@@ -118,126 +118,268 @@ objetos de bonificação, respeitando a dinâmica do jogo original.
 
 #### Implementação
 
-##### Personagens
+##### Formas base
 
-Adicionar aqui o código e descrição dos personagens. A princípio os personagens são esferas, a professora falou que poderiamos primeiro fazer simples para focar em outras coisas, já ganharemos ponto, mas é bom garantir botando bichos bonitinhos no final.
+```cpp
 
-A bola está com textura, então talvez seja preciso alterar isso pra cor lisa.
+```
+
+##### Coelho
+
+```cpp
+void desenhaCoelho() {
+    float corPelo[] = { 0.93f, 0.87f, 0.75f, 1.0f };  // bege claro
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    
+    glPushMatrix();                                        
+    glTranslatef(personagemPosX, personagemBaseY, personagemPosZ);  
+    glRotatef(-personagemAngulo, 0.0, 1.0, 0.0);
+    
+   //Corpo
+    glPushMatrix();
+    glTranslatef(0.0f, 0.55f, 0.0f);          
+    glScalef(1.0f, 0.85f, 1.3f);             
+    glutSolidSphere(0.4, 20, 20);             
+    glPopMatrix();
+
+    //Cabeça 
+    glPushMatrix();
+    glTranslatef(0.0f, 0.92f, -0.42f);
+    glScalef(1.0f, 0.95f, 1.15f);           
+    glutSolidSphere(0.26, 20, 20);
+    glPopMatrix();
+
+    //Focinho 
+    glPushMatrix();
+    glTranslatef(0.0f, 0.86f, -0.66f);
+    glScalef(1.1f, 0.85f, 1.0f);
+    glutSolidSphere(0.075, 12, 12);
+    glPopMatrix();
+
+    //Nariz 
+    glPushMatrix();
+    glTranslatef(0.0f, 0.90f, -0.72f);
+    glutSolidSphere(0.022, 8, 8);
+    glPopMatrix();
+
+    //Dentes 
+    glPushMatrix();
+    glTranslatef(-0.028f, 0.79f, -0.70f);
+    glScalef(0.045f, 0.06f, 0.03f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.028f, 0.79f, -0.70f);
+    glScalef(0.045f, 0.06f, 0.03f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+    
+    //Orelhas
+    glPushMatrix();
+    glTranslatef(-0.12f, 1.28f, -0.42f);
+    glRotatef(-12.0f, 0.0f, 0.0f, 1.0f);     
+    glRotatef(-10.0f, 1.0f, 0.0f, 0.0f);     
+    glScalef(0.08f, 0.42f, 0.08f);            
+    glutSolidSphere(1.0, 12, 12);
+    glPopMatrix();
+
+    
+    glPushMatrix();
+    glTranslatef(0.12f, 1.28f, -0.42f);
+    glRotatef(12.0f, 0.0f, 0.0f, 1.0f);
+    glRotatef(-10.0f, 1.0f, 0.0f, 0.0f);
+    glScalef(0.08f, 0.42f, 0.08f);
+    glutSolidSphere(1.0, 12, 12);
+    glPopMatrix();
+    
+   
+
+    //Olhos
+    float corOlho[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corOlho);
+
+    glPushMatrix();
+    glTranslatef(-0.10f, 0.98f, -0.70f);
+    glScalef(1.0f, 1.1f, 0.5f);
+    glutSolidSphere(0.028, 12, 12);    // <-- era 0.05
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0.10f, 0.98f, -0.70f);
+    glScalef(1.0f, 1.1f, 0.5f);
+    glutSolidSphere(0.028, 12, 12);
+    glPopMatrix();
+
+    //Patas
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    
+   //Pata dianteira esquerda
+    glPushMatrix();
+    glTranslatef(-0.18f, 0.18f + deslocamentoPata, -0.22f);
+    glScalef(0.10f, 0.36f, 0.10f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Pata dianteira direita
+    glPushMatrix();
+    glTranslatef(0.18f, 0.18f - deslocamentoPata, -0.22f);
+    glScalef(0.10f, 0.36f, 0.10f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Pata traseira esquerda
+    glPushMatrix();
+    glTranslatef(-0.18f, 0.18f - deslocamentoPata, 0.25f);
+    glScalef(0.12f, 0.36f, 0.12f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Pata traseira direita
+    glPushMatrix();
+    glTranslatef(0.18f, 0.18f + deslocamentoPata, 0.25f);
+    glScalef(0.12f, 0.36f, 0.12f);
+    glutSolidCube(1.0);
+    glPopMatrix();
+
+   //Rabo
+    glPushMatrix();
+    glTranslatef(0.0f, 0.60f, 0.55f);
+    glutSolidSphere(0.10, 10, 10);
+    glPopMatrix();
+    
+    glPopMatrix();
+}
+``
+
+##### Raposa
+
+```cpp
+
+``
+
+##### Verduras
+
+```cpp
+void desenhaCenoura3D() {
+        //Raiz
+        float corRaiz[] = { 0.97f, 0.60f, 0.09f, 1.0f };
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corRaiz);
+
+        glPushMatrix();
+        glTranslatef(0.0f, 0.20f, 0.0f);       
+        glRotatef(180.0f, 1.0f, 0.0f, 0.0f);   
+        glutSolidCone(0.12, 0.4, 12, 12);
+        glPopMatrix();
+
+        //Folhas
+        float corFolha[] = { 0.0f, 0.28f, 0.23f, 1.0f };
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corFolha);
+
+        for (int i = 0; i < 3; i++) {
+            glPushMatrix();
+            glTranslatef(0.0f, 0.40f, 0.0f);
+            glRotatef(i * 120.0f, 0.0f, 1.0f, 0.0f);
+            glRotatef(-25.0f, 1.0f, 0.0f, 0.0f);
+            glTranslatef(0.0f, 0.12f, 0.0f);
+            glutSolidCone(0.035, 0.22, 8, 8);
+            glPopMatrix();
+        }
+    }
+
+    void desenhaAlmeirao3D() {
+        float corFolha[] = { 0.70f, 0.98f, 0.58f, 1.0f };
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corFolha);
+
+        // Caule 
+        glPushMatrix();
+        glTranslatef(0.0f, 0.2f, 0.0f);
+        glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+        GLUquadric* q = gluNewQuadric();
+        gluCylinder(q, 0.02, 0.02, 0.4, 8, 1);
+        gluDeleteQuadric(q);
+        glPopMatrix();
+
+        // Folhas 
+        for (int i = 0; i < 3; i++) {
+            glPushMatrix();
+            glTranslatef(0.0f, 0.4f + i * 0.08f, 0.0f);
+            glRotatef(i * 120.0f, 0.0f, 1.0f, 0.0f);
+            glTranslatef(0.12f, 0.0f, 0.0f);
+            glScalef(1.4f, 0.25f, 0.7f);
+            glutSolidSphere(0.12, 10, 10);
+            glPopMatrix();
+        }
+    }
+``
 
 ##### Cenário
 
 Tentativa de um cenário infinito, com um chão que aparece a medida que o personagem se move.
 
-###### Variáveis de controle
-
 ```cpp
-float chaoDeslocX = 0.0f;
-float chaoDeslocZ = 0.0f;
-float chaoCelula = 2.0f;
-int chaoNumCelulas = 20;
+
 ```
 
-- chaoDeslocX: desloca a grade (grid) no eixo x.
-- chaoDeslocZ: desloca a grade no eixo z.
-- chaoCelula: tamanho de cada celula (tile) do chão, nesse caso, cada celula tem um tamanho 2x2.
-- chaoNumCelulas: quantidade de celulas em cada direção, nesse caso, forma um quadrado com 20x20 celulas.
+###### Variáveis de controle internas
+
+```cpp
+ float tamanho = 200.0;
+```
+- tamanho: determina o tamanho do quadrado, que nesse caso, representa o chão. Um tamanho grande é escolhido para dar a ilusão de um chão infinito.
 
 ###### função principal
 
 ```cpp
 void desenhaChao() {
-    glPushMatrix();
-
-    chaoDeslocX = floor(personagemPosX / chaoCelula) * chaoCelula;
-    chaoDeslocZ = floor(personagemPosZ / chaoCelula) * chaoCelula;
-    glTranslatef(chaoDeslocX, 0.0f, chaoDeslocZ);
-
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texID[0]);
 
-    for (int i = -chaoNumCelulas; i < chaoNumCelulas; i++) {
-        for (int j = -chaoNumCelulas; j < chaoNumCelulas; j++) {
-            float x1 = i * chaoCelula;
-            float z1 = j * chaoCelula;
-            float x2 = (i + 1) * chaoCelula;
-            float z2 = (j + 1) * chaoCelula;
-
-            glBegin(GL_QUADS);
-                glNormal3f(0.0, 1.0, 0.0);
-                glTexCoord2f(0.0, 0.0);
-                glVertex3f(x1, 0.0f, z1);
-                glTexCoord2f(1.0, 0.0);
-                glVertex3f(x2, 0.0f, z1);
-                glTexCoord2f(1.0, 1.0);
-                glVertex3f(x2, 0.0f, z2);
-                glTexCoord2f(0.0, 1.0);
-                glVertex3f(x1, 0.0f, z2);
-            glEnd();
-        }
-    }
+    float tamanho = 200.0f; // 200x200 cobre -100 ate +100
+    glBegin(GL_QUADS);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        glTexCoord2f(0.0f, 0.0f); 
+        glVertex3f(-tamanho, 0.0f, -tamanho);
+        glTexCoord2f(50.0f, 0.0f); 
+        glVertex3f( tamanho, 0.0f, -tamanho);
+        glTexCoord2f(50.0f, 50.0f); 
+        glVertex3f( tamanho, 0.0f,  tamanho);
+        glTexCoord2f(0.0f, 50.0f); 
+        glVertex3f(-tamanho, 0.0f,  tamanho);
+    glEnd();
 
     glDisable(GL_TEXTURE_2D);
-    glPopMatrix();
 }
 ```
 
 *O que o código faz?*
 
-- Empilha a matriz de tranformação atual, desconsiderando qualquer transformação anterior.
+- Habilita e aplica a textura.
 
 ```cpp
-glPushMatrix();
+glEnable(GL_TEXTURE_2D);
+glBindTexture(GL_TEXTURE_2D, texID[0]);
 ```
-
-- Calcula o deslocamento da grade baseado na posição atual do personagem:
+- Desenha o quadrado do chão e aplica as texturas.
 
 ```cpp
-chaoDeslocX = floor(personagemPosX / chaoCelula) * chaoCelula;
-chaoDeslocZ = floor(personagemPosZ / chaoCelula) * chaoCelula;
+glBegin(GL_QUADS);
+        glNormal3f(0.0f, 1.0f, 0.0f);
+        glTexCoord2f(0.0f, 0.0f); 
+        glVertex3f(-tamanho, 0.0f, -tamanho);
+        glTexCoord2f(50.0f, 0.0f); 
+        glVertex3f( tamanho, 0.0f, -tamanho);
+        glTexCoord2f(50.0f, 50.0f); 
+        glVertex3f( tamanho, 0.0f,  tamanho);
+        glTexCoord2f(0.0f, 50.0f); 
+        glVertex3f(-tamanho, 0.0f,  tamanho);
+    glEnd();
 ```
 
-A posição do personagem é dividida pelo tamanho da célula, obtém o inteiro mais próximo utilizando a função de arredondamento floor() e multiplica novamente pelo tamanho da célula. Esse processo é feito para os eixos X e Y e permite que a grade sempre fique alinhada com a posição atual do personagem.
-
-- Translada a grade para a posição calculada
-
-```cpp
-glTranslatef(chaoDeslocX, 0.0f, chaoDeslocZ);
-```
-Move a grade para que ela esteja centrada na posição atual do personagem.
-
-- Habilita e aplica a textura do chão
-
-- Desenha a grade de quadrados
-
-``` cpp
-for (int i = -chaoNumCelulas; i < chaoNumCelulas; i++) {
-        for (int j = -chaoNumCelulas; j < chaoNumCelulas; j++) {
-            float x1 = i * chaoCelula;
-            float z1 = j * chaoCelula;
-            float x2 = (i + 1) * chaoCelula;
-            float z2 = (j + 1) * chaoCelula;
-            
-            glBegin(GL_QUADS);
-                glNormal3f(0.0, 1.0, 0.0);
-                glTexCoord2f(0.0, 0.0);
-                glVertex3f(x1, 0.0f, z1);
-                glTexCoord2f(1.0, 0.0);
-                glVertex3f(x2, 0.0f, z1);
-                glTexCoord2f(1.0, 1.0);
-                glVertex3f(x2, 0.0f, z2);
-                glTexCoord2f(0.0, 1.0);
-                glVertex3f(x1, 0.0f, z2);
-            glEnd();
-        }
-    }
-```
-São desenhadas 20x20 células, onde cada uma é um quadrado no plano Y=0. Para aplicar a textura, utilizam-se as coordenadas (0,0) e (1,1) para que exibam a textura completa. A normal (0,1,0) indica que a superfície aponta pra cima para aplicação da iluminação.
-
-- Desabilita a textura e restaura a matriz de transformação
+- Desabilita a textura.
 
 ``` cpp
 glDisable(GL_TEXTURE_2D);
-glPopMatrix();
 ```
 
 ### Questão 02 - Texturas
@@ -262,6 +404,9 @@ char* textureFileNames[2] = {
     "texturas/marble.jpg"
 };
 ```
+
+Foi utilizado o código base dado em aula:
+
 ```cpp
 void loadTextures() {
     int width, height, nrChannels;
@@ -349,12 +494,12 @@ void specialKeyFunction(int key, int x, int y) {
 
 *O que o código faz?*
 
--Componentes:
+- Componentes:
 
 sin(rad) fornece a componente horizontal (eixo X) da direção.
 cos(rad) fornece a componente vertical (eixo Z) da direção.
 
--Seta pra cima:
+- Seta pra cima:
 
 ```cpp
 case GLUT_KEY_UP:
@@ -365,7 +510,7 @@ case GLUT_KEY_UP:
 
 Move o personagem para frente na direção que ele está olhando. Para isso, a função soma a posição do personagem em X com velocidade * sin(rad) e  subtrai a posição do personagem em Z com velocidade * cos(rad).
 
--Seta pra baixo:
+- Seta pra baixo:
 
 ```cpp
 case GLUT_KEY_DOWN:
@@ -376,7 +521,7 @@ case GLUT_KEY_DOWN:
 
 Move o personagem para trás na direção que ele está olhando. Para isso, a função subtrai a posição do personagem em X e soma a posição do personagem em Z com velocidade * cos(rad).
 
--Seta pra esquerda:
+- Seta pra esquerda:
 
 ```cpp
 case GLUT_KEY_LEFT:
@@ -385,7 +530,7 @@ case GLUT_KEY_LEFT:
 ```
 Rotaciona o personagem no sentido anti-horário diminuindo o ângulo atual do personagem.
 
--Seta pra direita:
+- Seta pra direita:
 
 ```cpp
 case GLUT_KEY_LEFT:
@@ -413,17 +558,38 @@ Permita que, ao pressionar a tecla “c”, a visualização da cena seja altern
 
 #### Implementação
 
- Para alterar a câmera, foi utilzada uma função "keyboardChangeCamera" que é passada como parâmetro de "glutKeyboardFunc".
- Dentro da função foram adicionados dois casos:
+##### Variáveis de controle
+```cpp
+    int modoCamera = 0;
+    float camDistancia = 2.0f;
+    float camAltura = 1.0f;
+    float cameraRotacaoY = 0.0;
+    float cameraRaio = 25.0;
+```
 
- - Um para parar o jogo. (ainda precisa ser implementado como pausa, não parar o jogo).
+- modoCamera: modo atual da câmera, 0 para visão geral, 1 para visão em primeira pessoa
+- camDistancia: distancia atrás do coelho em primeira pessoa
+- camAltura: altura da câmera vista em primeira pessoa
+- cameraRotacaoY: angulo atual da camera em visão geral.
+- cameraRaio: raio orbital em visão geral.
+
+#### Funções principais
+
+ Para alterar a câmera, foi utilzada uma função "keyboardChangeCamera" que é passada como parâmetro de "glutKeyboardFunc".
+ Dentro da função foram adicionados três casos:
+
+ - Uma para fechar o jogo quando ESC é pressionado.
  - Quando a pessoa pressiona a tecla 'c' para alternar o modo da câmera.
+ - Quando a pessoa pressiona a tecla 'r' para alternar o ângulo de visão geral (essa opção será abordada no tópico seguinte).
 
 ```cpp
 void keyboardChangeCamera(unsigned char key, int x, int y) {
     switch (key) {
         case 27: // ESC
             exit(0);
+            break;
+        case 'r':
+            cameraRotacaoY += 15.0;
             break;
         case 'c':
             modoCamera = (modoCamera + 1) % 2;
@@ -435,12 +601,51 @@ void keyboardChangeCamera(unsigned char key, int x, int y) {
 
 ```cpp
 void cameraVisaoGeral() {
+    float rad = cameraRotacaoY * M_PI / 180;
+
+    float camX = cameraRaio * sin(rad);
+    float camZ = cameraRaio * cos(rad);
+    float camY = 10.0;
+
     gluLookAt(
-        0.0, 15.0, 20.0, // posição camera
+        camX, camY, camZ, // posição camera
         0.0, 0.0, 0.0,   // mira
         0.0, 1.0, 0.0    // pra cima
     );
 }
+```
+*O que esse código faz?*
+
+- Componentes:
+
+sin(rad) fornece a componente horizontal (eixo X) da direção.
+cos(rad) fornece a componente vertical (eixo Z) da direção.
+
+- rad: converte o angulo atual do personagem para radianos, porque sin() e cos() exigem valores em radiano.
+
+```cpp
+ float rad = cameraRotacaoY * M_PI / 180;
+```
+
+- a partir do raio da câmera, é calculada a posição dela baseada nos eixos X e Z. Ela tem uma altura fixa.
+
+```cpp
+ float camX = cameraRaio * sin(rad);
+    float camZ = cameraRaio * cos(rad);
+    float camY = 10.0;
+```
+
+- a câmera sempre mira na origem.
+
+```cpp
+gluLookAt(
+        camX, camY, camZ, // posição camera
+        0.0, 0.0, 0.0,   // mira
+        0.0, 1.0, 0.0    // pra cima
+    );
+```
+
+```cpp
 ```
 
 ```cpp
@@ -461,6 +666,35 @@ void cameraPrimeiraPessoa() {
         0.0, 1.0, 0.0
     );
 }
+```
+
+*O que esse código faz?*
+
+- Componentes:
+
+sin(rad) fornece a componente horizontal (eixo X) da direção.
+cos(rad) fornece a componente vertical (eixo Z) da direção.
+
+- rad: converte o angulo atual do personagem para radianos, porque sin() e cos() exigem valores em radiano.
+
+```cpp
+float rad = personagemAngulo * M_PI / 180.0;
+```
+
+- a posição da câmera depende da posição atual do personagem em cada um dos eixos X e Z. Ela é calculada no eixo X a partir da posição do personagem menos a distância no eixo X, no eixo Z, ela é calculada a partir da posição do personagem menos a distância no eixo Z. A altura da câmera é fixa.
+
+```cpp
+float cameraX = personagemPosX - camDistancia * sin(rad);
+float cameraZ = personagemPosZ + camDistancia * cos(rad);
+float cameraY = camAltura;
+```
+
+- a mira acompanha sempre a posição atual do personagem nos eixos X e Z e mostra 5.0 a frente do coelho. A altura da mira é fixa.
+
+```cpp
+float alvoX = personagemPosX + 5.0 * sin(rad);
+float alvoZ = personagemPosZ - 5.0 * cos(rad);
+float alvoY = personagemRaio;
 ```
 
 ### Questão 05 - Rotação da câmera
@@ -489,22 +723,14 @@ void keyboardChangeCamera(unsigned char key, int x, int y) {
 }
 ```
 
+*O que esse código faz?*
+
+- Quando 'r' é pressionado, o ângulo de rotação em volta do eixo Y é incrementado, alterando o ângulo diretamente em visão geral.
+
 ```cpp
-void cameraVisaoGeral() {
-
-    float rad = cameraRoacaoY * M_PI / 180;
-
-    float camX = cameraRaio * sin(rad);
-    float camZ = cameraRaio * cos(rad);
-    float camY = 15.0;
-
-    gluLookAt(
-        camX, camY, camZ, // posição camera
-        0.0, 0.0, 0.0,   // mira
-        0.0, 1.0, 0.0    // pra cima
-    );
-}
-
+case 'r':
+            cameraRoacaoY += 15.0;
+            break;
 ```
 
 ### Questão 06 - Iluminação
