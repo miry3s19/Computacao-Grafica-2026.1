@@ -102,12 +102,57 @@ void init() {
 #### display
 
 ```cpp
+void display() {
+    atualizaVegetais();
+    colisaoVegetal();
+    atualizaRaposa();
+    atualizaPulo();
+    
+    if (imune) {
+        tempoImune--;
+        if (tempoImune <= 0) imune = false;
+    }
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
 
+    switch (modoCamera) {
+        case 0:
+            cameraVisaoGeral();
+            break;
+        case 1:
+            cameraPrimeiraPessoa();
+            break;
+    }
+    
+    desenhaChao();
+    desenhaVegetais();
+    desenhaCoelho();
+    if (raposaVisivel) {
+        glPushMatrix();
+        glTranslatef(raposaX, 0.0f, raposaZ);
+        glRotatef(raposaAngulo, 0.0f, 1.0f, 0.0f);
+        desenhaRaposa();
+        glPopMatrix();
+    }
+
+    desenhaTextos();
+
+    glutSwapBuffers();
+}
 ```
+
+- **Atualizações de estado**: chama as funções que atualizam a posição dos vegetais, verificam colisões, movem a raposa e atualizam a física do pulo.
+- **Controle de imunidade**: decrementa o contador de tempo de imunidade a cada frame; quando chega a zero, desativa o efeito.
+- **Limpeza do buffer**: limpa os buffers de cor e profundidade.
+- **Seleção da câmera**: escolhe entre a visão geral e a primeira pessoa com base na variável `modoCamera`.
+- **Desenho da cena**: desenha o chão, os vegetais, o coelho e, se visível, a raposa.
+- **Textos**: desenha os textos de interface (vidas, pontos, imunidade).
+- **Troca de buffers**: exibe o frame renderizado (`glutSwapBuffers`).
 
 ## Questões Propostas
 
 ### Questão 01 - Modelagem tridimensional
+
 
 #### Instruções
 
@@ -118,11 +163,213 @@ objetos de bonificação, respeitando a dinâmica do jogo original.
 
 #### Implementação
 
-##### Formas base
+### Formas base
+
+Foram utilizados os seguintes sólidos da GLUT para compor os personagens e elementos do jogo:
+
+| Sólido | Utilização |
+|--------|-----------|
+| `glutSolidSphere` | Corpo, cabeça, focinho, nariz, olhos, orelhas, rabo, folhas arredondadas |
+| `glutSolidCube` | Dentes, patas |
+| `glutSolidCone` | Orelhas da raposa, rabo da raposa, raiz da cenoura, folhas da cenoura |
+| `gluCylinder` | Caule do almeirão, caule e nervuras da couve |
+
+### Raposa
+
+void desenhaRaposa() {
+    float corPelo[]     = { 0.95f, 0.51f, 0.49f, 1.0f };
+    float corBarriga[]  = { 1.00f, 1.00f, 1.00f, 1.0f };
+    float corOlho[]     = { 0.05f, 0.05f, 0.05f, 1.0f };
+
+    // Corpo
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.55f, 0.0f);
+    glScalef(1.0f, 0.85f, 1.5f);   
+    glutSolidSphere(0.4, 16, 16);
+    glPopMatrix();
+
+    // Cabeça
+    glPushMatrix();
+    glTranslatef(0.0f, 0.95f, -0.5f);
+    glutSolidSphere(0.24, 16, 16);
+    glPopMatrix();
+
+    // Focinho
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corBarriga);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.92f, -0.55f);      
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);    
+    glTranslatef(0.0f, 0.10f, 0.0f);        
+    glutSolidCone(0.10, 0.20, 10, 10);
+    glPopMatrix();
+
+    // Nariz
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corOlho);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.92f, -0.86f);
+    glutSolidSphere(0.03, 8, 8);
+    glPopMatrix();
+
+    // Olhos
+    glPushMatrix();
+    glTranslatef(-0.10f, 1.00f, -0.68f);
+    glutSolidSphere(0.04, 8, 8);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(0.10f, 1.00f, -0.68f);
+    glutSolidSphere(0.04, 8, 8);
+    glPopMatrix();
+
+    // Orelhas
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    for (int lado = -1; lado <= 1; lado += 2) {
+        glPushMatrix();
+        glTranslatef(lado * 0.12f, 1.20f, -0.48f);
+        glRotatef(lado * -15.0f, 0.0f, 0.0f, 1.0f);
+        glRotatef(-10.0f, 1.0f, 0.0f, 0.0f);
+        glutSolidCone(0.06, 0.20, 8, 8);
+        glPopMatrix();
+    }
+
+    // Patas
+    for (int lado = -1; lado <= 1; lado += 2) {
+        // Dianteiras
+        glPushMatrix();
+        glTranslatef(lado * 0.18f, 0.18f, -0.30f);
+        glScalef(0.10f, 0.36f, 0.10f);
+        glutSolidCube(1.0);
+        glPopMatrix();
+
+        // Traseiras
+        glPushMatrix();
+        glTranslatef(lado * 0.18f, 0.18f, 0.35f);
+        glScalef(0.11f, 0.36f, 0.11f);
+        glutSolidCube(1.0);
+        glPopMatrix();
+    }
+
+    // Rabo
+    glPushMatrix();
+    glTranslatef(0.0f, 0.65f, 0.60f);
+    glRotatef(-100.0f, 1.0f, 0.0f, 0.0f);  
+    glScalef(1.0f, 1.8f, 1.0f);
+    glutSolidCone(0.08, 0.30, 8, 8);
+    glPopMatrix();
+}
+```
+Foram utilizadas esferas, cones e cubos para compor a raposa, com transformações de escala para deformar os sólidos conforme desejado.
+
+### Verduras
+
+#### Couve
 
 ```cpp
+void desenhaCouve3D() {
+    float corVerdeClaro[]  = { 0.70f, 0.98f, 0.58f, 1.0f };
+    float corVerdeEscuro[] = { 0.00f, 0.28f, 0.23f, 1.0f };
 
+    // Folha
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corVerdeEscuro);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.30f, 0.0f);
+    glScalef(0.75f, 1.0f, 0.10f);
+    glutSolidSphere(0.28, 16, 16);
+    glPopMatrix();
+
+    // Caule + nervuras
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.0f);
+    desenhaCilindroVertical(0.55f, 0.035f, 0.008f,
+                            corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
+    glPopMatrix();
+
+    // Linhas laterais
+    float comprimento  = 0.12f;
+    float raioNervura  = 0.008f;
+    float zFrente      = 0.045f;
+    float zTras        = -0.045f;
+    float angulo = 40.0f;
+    float ySaida[3] = { 0.18f, 0.28f, 0.38f };
+
+    for (int lado = -1; lado <= 1; lado += 2) {
+        for (int face = 0; face < 2; face++) {
+            float zFace = (face == 0) ? zFrente : zTras;
+            for (int i = 0; i < 3; i++) {
+                glPushMatrix();
+                glTranslatef(0.0f, ySaida[i], zFace);
+                glRotatef(lado * angulo, 0.0f, 0.0f, 1.0f);
+                glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+                desenhaCilindroVertical(comprimento, raioNervura, raioNervura,
+                                        corVerdeClaro[0], corVerdeClaro[1], corVerdeClaro[2]);
+                glPopMatrix();
+            }
+        }
+    }
+}
 ```
+Foram utilizadas esferas e cilindros para compor a couve, com transformações de escala para deformar os sólidos conforme desejado. Os cilindros laterais saem do caule em diferentes alturas, tanto na frente quanto atrás, simulando as nervuras da folha.
+
+#### Função auxiliar para cilindros
+
+```cpp
+void desenhaCilindroVertical(float altura, float raioBase, float raioTopo,
+                             float r, float g, float b) {
+    float cor[] = { r, g, b, 1.0f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, cor);
+    glPushMatrix();
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+    GLUquadric* q = gluNewQuadric();
+    gluCylinder(q, raioBase, raioTopo, altura, 10, 1);
+    gluDeleteQuadric(q);
+    glPopMatrix();
+}
+```
+### Aparecimento aleatório dos obstáculos e bonificações
+
+```cpp
+void inicializaVegetais() {
+    for (int i = 0; i < NUM_VEGETAIS; i++) {
+        vegetais[i].x = (rand() % 40) - 20.0f;    // -20 a +20
+        vegetais[i].z = (rand() % 40) - 20.0f;
+        vegetais[i].tipo = (rand() % 3) + 1;
+        vegetais[i].bloco = 0;
+        vegetais[i].ativo = true;
+    }
+}
+
+void atualizaVegetais() {
+    // Recicla vegetais que ficaram para trás do coelho
+    for (int i = 0; i < NUM_VEGETAIS; i++) {
+        if (vegetais[i].ativo && vegetais[i].x < personagemPosX - 30.0f) {
+            vegetais[i].x = personagemPosX + 30.0f + (rand() % 20);
+            vegetais[i].z = (rand() % 40) - 20.0f;
+            vegetais[i].tipo = (rand() % 3) + 1;
+            vegetais[i].ativo = true;
+        }
+    }
+}
+```
+
+### Aparecimento aleatório da raposa
+
+```cpp
+void atualizaRaposa() {
+    float coelhoX = personagemPosX;
+    float coelhoZ = personagemPosZ;
+
+    if (!raposaVisivel) {
+        int numeroAleatorio = rand() % 100;
+        if (numeroAleatorio < 1) {
+            float distancia = 15.0f;
+            raposaX = coelhoX - distancia;   
+            raposaZ = coelhoZ + (rand() % 10 - 5);  
+            raposaVisivel = true;
+        }
+    } else {
+        // ... movimentação e colisão ...
+    }
+}
 
 ##### Coelho
 
@@ -742,6 +989,40 @@ As fontes deverão contribuir para a iluminação dos diferentes elementos tridi
 
 #### Implementação
 
-Eu copiei algumas coisas direto no código da professora, eu acho que tem iluminação já.
+Foram utilizadas **duas fontes de luz** na cena:
+
+```cpp
+glEnable(GL_LIGHT0);
+glEnable(GL_LIGHT1);
+
+// Luz 1 - difusa, posicionada
+float luz1Difusa[]  = { 0.3f, 0.4f, 0.5f, 1.0f };
+float luz1Posicao[] = { -8.0f, 6.0f, -5.0f, 1.0f };
+glLightfv(GL_LIGHT1, GL_DIFFUSE,  luz1Difusa);
+glLightfv(GL_LIGHT1, GL_POSITION, luz1Posicao);
+
+// Luz 0 - ambiente + difusa, posicionada no topo
+float luzAmbiente[] = {0.3f, 0.3f, 0.3f, 1.0f};
+float luzDifusa[]  = {0.7f, 0.7f, 0.7f, 1.0f};
+float luzPosicao[] = {0.0f, 10.0f, 0.0f, 1.0f};
+glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
+glLightfv(GL_LIGHT0, GL_POSITION, luzPosicao);
+```
+
+### Descrição das luzes
+
+| Luz | Tipo | Posição | Contribuição |
+|-----|------|---------|--------------|
+| GL_LIGHT0 | Ambiente + Difusa | (0, 10, 0) | Iluminação principal, vinda de cima |
+| GL_LIGHT1 | Difusa | (-8, 6, -5) | Luz de preenchimento, vinda de trás/esquerda |
+
+### Material padrão
+
+```cpp
+float white[4] = { 1, 1, 1, 1 };
+glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, white);
+```
+
 
 ## Bônus
