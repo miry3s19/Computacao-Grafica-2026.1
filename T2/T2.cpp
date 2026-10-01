@@ -16,6 +16,12 @@ float personagemBaseY = 0.0f;
 
 float deslocamentoPata = 0.0f; 
 
+float velocidadePulo = 0.0f;
+float gravidade = -0.015f;
+float forcaPulo = 0.22f;
+bool coelhoPulando = false;
+void iniciaPulo();
+
 float raposaX = 0.0f;
 float raposaZ = 0.0f;
 float raposaAngulo = 0.0f;
@@ -211,6 +217,9 @@ void keyboardChangeCamera(unsigned char key, int x, int y) {
         case 'c':
         case 'C':
             modoCamera = (modoCamera + 1) % 2;
+            break;
+        case 32:
+            iniciaPulo();
             break;
     }
     glutPostRedisplay();
@@ -421,6 +430,26 @@ void desenhaCoelho() {
     glPopMatrix();
     
     glPopMatrix();
+}
+
+void iniciaPulo() {
+    if (!coelhoPulando) {
+        coelhoPulando = true;
+        velocidadePulo = forcaPulo;
+    }
+}
+
+void atualizaPulo() {
+    if (coelhoPulando) {
+        velocidadePulo += gravidade;       
+        personagemBaseY += velocidadePulo; 
+
+        if (personagemBaseY <= 0.0f) {
+            personagemBaseY = 0.0f;
+            velocidadePulo = 0.0f;
+            coelhoPulando = false;
+        }
+    }
 }
 
 void desenhaRaposa() {
@@ -771,6 +800,7 @@ void display() {
     atualizaVegetais();
     colisaoVegetal();
     atualizaRaposa();
+    atualizaPulo();
     
     if (imune) {
         tempoImune--;
