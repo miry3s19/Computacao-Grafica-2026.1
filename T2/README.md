@@ -11,21 +11,7 @@
 - [Questão 05 - Rotação da Câmera](#questão-05---rotação-da-câmera)
 - [Questão 06 - Iluminação](#questão-06---iluminação)
 
-## Anotações úteis
 
-Use para inserir um bloco de código:
-```cpp
-
-```
-
-Use ctrl + shift + v para visualizar o resultado do markdown no vs code
-
-## Tarefas faltantes (excluir depois!)
-
-- Adicionar descrição das tarefas que já fiz
-
-- Editar personagens e fazer bonificações
-- Adicionar display  em visão geral quando ele for finalizado
 
 ## Contextualização do Trabalho
 
@@ -515,6 +501,7 @@ void atualizaRaposa() {
         // ... movimentação e colisão ...
     }
 }
+```
 
 ##### Coelho
 
@@ -642,12 +629,92 @@ void desenhaCoelho() {
     
     glPopMatrix();
 }
-``
+```
 
 ##### Raposa
 
 ```cpp
+void desenhaRaposa() {
+    float corPelo[]     = { 0.95f, 0.51f, 0.49f, 1.0f };
+    float corBarriga[]  = { 1.00f, 1.00f, 1.00f, 1.0f };
+    float corOlho[]     = { 0.05f, 0.05f, 0.05f, 1.0f };
 
+    // Corpo
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.55f, 0.0f);
+    glScalef(1.0f, 0.85f, 1.5f);   
+    glutSolidSphere(0.4, 16, 16);
+    glPopMatrix();
+
+    // Cabeça
+    glPushMatrix();
+    glTranslatef(0.0f, 0.95f, -0.5f);
+    glutSolidSphere(0.24, 16, 16);
+    glPopMatrix();
+
+    // Focinho
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corBarriga);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.92f, -0.55f);      
+    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);    
+    glTranslatef(0.0f, 0.10f, 0.0f);        
+    glutSolidCone(0.10, 0.20, 10, 10);
+    glPopMatrix();
+
+    // Nariz
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corOlho);
+    glPushMatrix();
+    glTranslatef(0.0f, 0.92f, -0.86f);
+    glutSolidSphere(0.03, 8, 8);
+    glPopMatrix();
+
+    // Olhos
+    glPushMatrix();
+    glTranslatef(-0.10f, 1.00f, -0.68f);
+    glutSolidSphere(0.04, 8, 8);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(0.10f, 1.00f, -0.68f);
+    glutSolidSphere(0.04, 8, 8);
+    glPopMatrix();
+
+    // Orelhas
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, corPelo);
+    for (int lado = -1; lado <= 1; lado += 2) {
+        glPushMatrix();
+        glTranslatef(lado * 0.12f, 1.20f, -0.48f);
+        glRotatef(lado * -15.0f, 0.0f, 0.0f, 1.0f);   // inclina para os lados
+        glRotatef(-10.0f, 1.0f, 0.0f, 0.0f);          // inclina levemente para trás
+        glutSolidCone(0.06, 0.20, 8, 8);
+        glPopMatrix();
+    }
+
+    // Patas
+    for (int lado = -1; lado <= 1; lado += 2) {
+        // Dianteiras
+        glPushMatrix();
+        glTranslatef(lado * 0.18f, 0.18f, -0.30f);
+        glScalef(0.10f, 0.36f, 0.10f);
+        glutSolidCube(1.0);
+        glPopMatrix();
+
+        // Traseiras
+        glPushMatrix();
+        glTranslatef(lado * 0.18f, 0.18f, 0.35f);
+        glScalef(0.11f, 0.36f, 0.11f);
+        glutSolidCube(1.0);
+        glPopMatrix();
+    }
+
+    // Rabo
+    glPushMatrix();
+    glTranslatef(0.0f, 0.65f, 0.60f);
+    glRotatef(-100.0f, 1.0f, 0.0f, 0.0f);  
+    glScalef(1.0f, 1.8f, 1.0f);
+    glutSolidCone(0.08, 0.30, 8, 8);
+    glPopMatrix();
+}
 ``
 
 ##### Verduras
@@ -703,7 +770,7 @@ void desenhaCenoura3D() {
             glPopMatrix();
         }
     }
-``
+```
 
 ### Sistema de vidas, pontos e imunidade
 
