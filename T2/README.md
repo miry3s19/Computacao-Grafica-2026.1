@@ -98,6 +98,135 @@ void init() {
     glLoadIdentity();
 }
 ```
+#### loadTextures
+
+```cpp
+GLuint texID[2]; // 0 = chão, 1 = personagem
+char* textureFileNames[2] = {
+    "texturas/grass.jpg",
+    "texturas/marble.jpg"
+};
+
+void loadTextures() {
+    int width, height, nrChannels;
+    unsigned char *data;
+
+    glGenTextures(2, texID);
+
+    for (int i = 0; i < 2; i++) {
+        glBindTexture(GL_TEXTURE_2D, texID[i]);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        data = stbi_load(textureFileNames[i], &width, &height, &nrChannels, 0);
+
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+        } else {
+            printf("Failed to load texture: %s\n", textureFileNames[i]);
+        }
+        stbi_image_free(data);
+    }
+}
+```
+
+- **Geração de IDs**: cria 2 identificadores de textura (`glGenTextures`).
+- **Configuração de wrapping/filtragem**: define repetição (`GL_REPEAT`) e filtragem linear (`GL_LINEAR`), garantindo que a textura se repita corretamente no chão.
+- **Carregamento com stb_image**: lê o arquivo de imagem e obtém largura, altura e canais.
+- **Envio para a GPU**: `glTexImage2D` envia os dados para a OpenGL; `GL_GENERATE_MIPMAP` gera mipmaps automaticamente.
+- **Liberação de memória**: `stbi_image_free` libera o buffer da imagem após o envio.
+
+#### Funções de texto (HUD)
+
+```cpp
+void textoGameOver(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "GAME OVER! Suas vidas acabaram :( Aperte 'R' para reiniciar.";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoPausa(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "JOGO PAUSADO";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoVidas(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[10];
+    sprintf(texto, "Vidas: %d", vidas);
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoPontos(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[10];
+    sprintf(texto, "Pontos: %d", pontos);
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+
+void textoImune(float x, float y) {
+    glRasterPos2f(x, y);
+    char texto[] = "IMUNIDADE ATIVADA!";
+    for(int i = 0; texto[i] != '\0'; i++) {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, texto[i]);
+    }
+}
+```
+
+- **Posicionamento**: `glRasterPos2f` define a posição do texto no espaço da janela.
+- **Renderização caractere a caractere**: `glutBitmapCharacter` desenha cada caractere usando a fonte `GLUT_BITMAP_TIMES_ROMAN_24`.
+- **Formatação dinâmica**: `sprintf` formata strings com valores atuais de vidas e pontos.
+
+```cpp
+void desenhaTextos() {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, 100, 0, 100);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_DEPTH_TEST);
+
+    glColor3f(0.0f, 0.0f, 0.0f);
+    textoVidas(2.0f, 95.0f);
+    textoPontos(2.0f, 90.0f);
+    if (imune) {
+        glColor3f(0.0f, 0.5f, 0.0f);
+        textoImune(2.0f, 85.0f);
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+}
+```
+
+- **Troca para projeção ortográfica**: `gluOrtho2D(0, 100, 0, 100)` cria um sistema de coordenadas 2D fixo, independente da câmera 3D, garantindo que o HUD fique sempre no canto da tela.
+- **Desabilitação temporária**: desliga iluminação, textura e teste de profundidade para que o texto seja desenhado por cima da cena sem interferência.
+- **Restauração de estados**: reativa `GL_DEPTH_TEST` e `GL_LIGHTING` ao final, e restaura as matrizes com `glPopMatrix`.
 
 #### display
 
@@ -148,6 +277,22 @@ void display() {
 - **Desenho da cena**: desenha o chão, os vegetais, o coelho e, se visível, a raposa.
 - **Textos**: desenha os textos de interface (vidas, pontos, imunidade).
 - **Troca de buffers**: exibe o frame renderizado (`glutSwapBuffers`).
+
+#### reshape
+
+```cpp
+void reshape(int w, int h) {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60, (double)w / (double)h, 0.1, 1000.0);
+    glMatrixMode(GL_MODELVIEW);
+}
+```
+
+- **Ajuste do viewport**: define a área de renderização para toda a janela.
+- **Reconfiguração da projeção**: recria a matriz de projeção perspectiva com o novo aspecto (`w/h`), evitando distorção ao redimensionar a janela.
+- **Retorno ao modelo**: volta para `GL_MODELVIEW` para que as transformações da cena continuem funcionando corretamente.
 
 ## Questões Propostas
 
@@ -560,6 +705,73 @@ void desenhaCenoura3D() {
     }
 ``
 
+### Sistema de vidas, pontos e imunidade
+
+```cpp
+int vidas = 5;
+int pontos = 0;
+bool imune = false;
+int tempoImune = 180;
+```
+
+- **vidas**: começa em 5; decrementada ao colidir com a raposa.
+- **pontos**: incrementado ao coletar vegetais.
+- **imune**: ativado ao coletar couve; impede dano da raposa.
+- **tempoImune**: contador em frames (180 ≈ 3 segundos a 60 FPS).
+
+```cpp
+if (imune) {
+    tempoImune--;
+    if (tempoImune <= 0) imune = false;
+}
+```
+
+- A cada frame, o contador é decrementado; ao chegar a zero, a imunidade é desativada.
+
+### Colisão com vegetais
+
+```cpp
+void colisaoVegetal() {
+    float coelhoX = personagemPosX;
+    float coelhoZ = personagemPosZ;
+    float raioColeta = 0.6f;   
+
+    for (int i = 0; i < NUM_VEGETAIS; i++) {
+        if (!vegetais[i].ativo) continue;
+
+        float dx = coelhoX - vegetais[i].x;
+        float dz = coelhoZ - vegetais[i].z;
+        float distancia = sqrtf(dx*dx + dz*dz);
+
+        if (distancia < raioColeta) {
+            vegetais[i].ativo = false;
+
+            switch (vegetais[i].tipo) {
+                case 1: 
+                    pontos++;
+                    vidas++;
+                    break;
+                case 2: 
+                    pontos += 10;
+                    break;
+                case 3: 
+                    pontos++;
+                    imune = true;
+                    tempoImune = 180;
+                    break;
+            }
+        }
+    }
+}
+```
+
+- **Detecção**: calcula a distância euclidiana no plano XZ entre o coelho e cada vegetal ativo.
+- **Coleta**: se a distância for menor que `raioColeta` (0.6), o vegetal é desativado e seus efeitos são aplicados.
+- **Efeitos por tipo**:
+  - Tipo 1 (almeirão): +1 ponto e +1 vida.
+  - Tipo 2 (cenoura): +10 pontos.
+  - Tipo 3 (couve): +1 ponto e ativa imunidade por 180 frames.
+
 ##### Cenário
 
 Tentativa de um cenário infinito, com um chão que aparece a medida que o personagem se move.
@@ -793,6 +1005,70 @@ glutPostRedisplay();
 ```
 
 Por fim, redesenha a tela com as mudanças realizadas.
+
+### Sistema de pulo
+
+```cpp
+float velocidadePulo = 0.0f;
+float gravidade = -0.015f;
+float forcaPulo = 0.22f;
+bool coelhoPulando = false;
+```
+
+- **velocidadePulo**: velocidade vertical atual do coelho.
+- **gravidade**: aceleração aplicada a cada frame.
+- **forcaPulo**: impulso inicial aplicado ao pular.
+- **coelhoPulando**: flag que indica se o coelho está no ar.
+
+```cpp
+void iniciaPulo() {
+    if (!coelhoPulando) {
+        coelhoPulando = true;
+        velocidadePulo = forcaPulo;
+    }
+}
+```
+
+- **Acionamento**: chamada pela tecla espaço (`case 32` em `keyboardChangeCamera`).
+- **Restrição**: só permite pular se o coelho já não estiver pulando (evita pulo duplo).
+
+```cpp
+void atualizaPulo() {
+    if (coelhoPulando) {
+        velocidadePulo += gravidade;       
+        personagemBaseY += velocidadePulo; 
+
+        if (personagemBaseY <= 0.0f) {
+            personagemBaseY = 0.0f;
+            velocidadePulo = 0.0f;
+            coelhoPulando = false;
+        }
+    }
+}
+```
+
+- **Física**: aplica gravidade à velocidade vertical e atualiza a posição Y (`personagemBaseY`).
+- **Aterrissagem**: quando o coelho retorna ao chão (Y ≤ 0), zera a velocidade, reseta a posição e desativa a flag.
+
+### Animação das patas
+
+```cpp
+float deslocamentoPata = 0.0f; 
+```
+
+```cpp
+//Pata dianteira esquerda
+glTranslatef(-0.18f, 0.18f + deslocamentoPata, -0.22f);
+//Pata dianteira direita
+glTranslatef(0.18f, 0.18f - deslocamentoPata, -0.22f);
+//Pata traseira esquerda
+glTranslatef(-0.18f, 0.18f - deslocamentoPata, 0.25f);
+//Pata traseira direita
+glTranslatef(0.18f, 0.18f + deslocamentoPata, 0.25f);
+```
+
+- **Efeito**: desloca verticalmente as patas em pares opostos (dianteira esquerda sobe enquanto dianteira direita desce), simulando o movimento de caminhada/corrida.
+- **Observação**: no estado atual do código, `deslocamentoPata` não é modificado em nenhum ponto — permanece 0, portanto a animação está implementada mas inativa.
 
 
 ### Questão 04 - Alternância da câmera
